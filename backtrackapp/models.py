@@ -1,5 +1,9 @@
 from django.db import models
 
+class User(models.Model):
+    name = models.CharField(max_length=256)
+    available = models.BooleanField()
+
 class Project(models.Model):
     name = models.CharField(max_length=256)
     desc = models.TextField()
@@ -36,12 +40,7 @@ class Task(models.Model):
     status = models.CharField(max_length=1, choices=STATUS)
     pbi = models.ForeignKey(ProductBacklogItem,
     on_delete = models.CASCADE)
-    assignment = models.ManyToManyField(User,
-    on_delete = models.PROTECT)
+    assignment = models.ManyToManyField(User)
 
     def __str__(self):
         return self.name
-
-class User(models.Model):
-    name = models.CharField(max_length=256)
-    available = models.BooleanField(default = True)
