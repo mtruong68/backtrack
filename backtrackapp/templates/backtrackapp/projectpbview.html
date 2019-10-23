@@ -1,0 +1,13 @@
+
+<h3>{{project.name}} Product Backlog</h3>
+{% for pbi in project.productbacklogitem_set.all %}
+  <div>
+      <p><b>{{pbi.name}}</b>: {{pbi.desc}}</p>
+  </div>
+{% endfor %}
+
+<form method="POST">
+  {% csrf_token %}
+  {{form.as_p}}
+  <input type="submit" value="Create New PBI">
+</form>

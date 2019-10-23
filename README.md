@@ -1,7 +1,7 @@
-#Backtrack application for Scrum Management#
+#Backtrack application for Scrum Management
 Built with Python v 3.5.2 and Django 2.2.6
 
-##current todo##
+##current todo
 * allow deletion of projects on the interface
 * link each project view to its own page where you add pbi (via another form view)
 * WRITE TESTS
