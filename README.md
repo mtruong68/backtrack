@@ -1,24 +1,24 @@
-#Backtrack application for Scrum Management
+# Backtrack application for Scrum Management
 Built with Python v 3.5.2 and Django 2.2.6
 
-##current todo
-* allow deletion of projects on the interface
-* link each project view to its own page where you add pbi (via another form view)
+## current todo
+* allow deletion/modification of projects on the interface
+* allow deletion/modification of pbis on the interface
+* create some sort of sprint/task functionality
 * WRITE TESTS
 * deploy server to heroku
-* make it look a little nicer... not too much
+* please someone... do some css magic on it... its so ugly rn
 
 To run locally on your machine:
 `$ python manage.py runserver`
 
-Note: Backtrack is the project name, backtrackapp is the app name (confusing, I know. sorry) Links just use backtrack
-local links:
+Note: Backtrack is the project name, backtrackapp is the app name (confusing, I know. sorry)
+Links to use Backtrack:
 localhost:8000/backtrack/
-localhost:8000/backtrack/<projectname>
+localhost:8000/backtrack/<project_id>/productbacklog
 
 *do not delete the polls app (yet)!!!*
 (I need it for reference)
-
 
 Every time you make changes to the models.py for the backtrackapp (does not apply to inserting/deleting items in the database using forms/shell)
 ```
