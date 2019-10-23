@@ -10,6 +10,12 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def create(cls, name, desc):
+        newProject = cls(name=name, desc=desc)
+        # do something with the book
+        return newProject
+
 class ProductBacklogItem(models.Model):
     STATUS = (
         ('NS', 'Not Started'),

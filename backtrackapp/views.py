@@ -1,13 +1,43 @@
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
 from django.views import generic
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse
 
+from .forms import NewProjectForm, NameForm
 from .models import Project
 
-# Create your views here.
-class IndexView(generic.ListView):
-    template_name = 'backtrackapp/index.html'
-    context_object_name = 'projects'
+def IndexView(request):
+    projects = Project.objects.all()
+    form = NewProjectForm()
 
-    def get_queryset(self):
-        return Project.objects.all()
+    if request.method == 'POST':
+        form = NewProjectForm(request.POST)
+        if form.is_valid():
+            newProject = form.save()
+            newProject.save()
+            return HttpResponseRedirect(reverse('backtrack:index'))
+    else:
+        form = NewProjectForm()
+
+    return render(request,
+    'backtrackapp/index.html',
+    {'form': form,
+    'projects': projects})
+
+# Create your views here.
+class newProjectView(generic.CreateView):
+    def get(self, request):
+        context = {'form': NewProjectForm()}
+        return render(request, 'backtrackapp/index.html', context)
+
+    def post(self, request, *args, **kwargs):
+        form = NewProjectForm(request.POST)
+        projects = Project.objects.all()
+        if form.is_valid():
+            newProject = form.save()
+            newProject.save()
+            return HttpResponseRedirect(reverse('backtrack:index'))
+
+        return render(request,
+        'backtrackapp/index.html',
+        {'projects': projects,'form': form})
