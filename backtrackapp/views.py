@@ -43,10 +43,11 @@ class NewProjectView(generic.CreateView):
         'backtrackapp/index.html',
         {'projects': projects,'form': form})
 
+#Views handling the client accessing the Product Backlog
 #Maybe make separate view for just looking at the product backlog
 class ProjectPBView(generic.CreateView):
+    #need to sort pbi by priority and show in order of priorty
     def get(self, request, pk):
-        #sort project pbi by priority then return
         project = get_object_or_404(Project, pk=pk)
         context = {'form': NewPBIForm(initial={'project': project}),
         'project': project}
@@ -91,4 +92,31 @@ class ProjectPBView(generic.CreateView):
             print(form.errors)
             return HttpResponse("Did not work.")
 
-#class NewTaskView(generic.CreateView):
+#Views handling the client accessing the Sprint Backlog
+#NOTE THIS IS NOT YET "COMPLETE" FORMS MUST BE INCLUDED
+class SprintBacklogView(generic.DetailView):
+    def get(self, request, pk):
+        sprint = get_object_or_404(Sprint, pk=pk)
+        return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint})
+
+    def post(self, pk, request):
+        if 'createNewTask' in self.request.POST:
+            return self.createNewTask(pk, request)
+        else:
+            #this is a stub method and needs to be changed
+            print(form.errors)
+            return HttpResponse("Did not work.")
+
+    #METHOD NOT FINISHED YET
+    def createNewTask(self, request, pk):
+        pbi = get_object_or_404(ProductBacklogItem, pk=pk)
+        form = NewTaskForm(request.POST, initial={"pbi":pbi})
+        if form.is_valid():
+            newTask = form.save(commit=False)
+            newTask.pbi = pbi
+            newTask.save()
+            return HttpResponseRedirect(reverse('backtrack:project_sb', args=(pk,)))
+        else:
+            #this is a stub method and needs to be changed
+            print(form.errors)
+            return HttpResponse("Did not work.")

@@ -3,8 +3,8 @@ Built with Python v 3.5.2 and Django 2.2.6
 
 ## current todo
 * allow deletion/modification of projects on the interface
-* allow deletion/modification of pbis on the interface
-* create some sort of sprint/task functionality
+* allow modification/refinement of pbis on the interface
+* create/modify/add tasks
 * WRITE TESTS
 * deploy server to heroku
 * please someone... do some css magic on it... its so ugly rn

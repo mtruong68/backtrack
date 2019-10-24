@@ -7,4 +7,6 @@ urlpatterns = [
     path('', views.IndexView, name='index'),
     path('newproject', views.NewProjectView.as_view(), name="new_project"),
     path('<int:pk>/productbacklog/', views.ProjectPBView.as_view(), name="project_pb"),
+    path('<int:pk>/sprintbacklog/', views.SprintBacklogView.as_view(),
+    name="project_sb")
 ]

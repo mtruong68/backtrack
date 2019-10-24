@@ -21,4 +21,8 @@ class NewPBIForm(forms.ModelForm):
 class NewTaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = '__all__'
+        exclude = ['pbi']
+        labels = {
+        "desc": "Description",
+        "assignment": "Assigned To"
+        }
