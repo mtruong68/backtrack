@@ -13,9 +13,16 @@ To run locally on your machine:
 `$ python manage.py runserver`
 
 Note: Backtrack is the project name, backtrackapp is the app name (confusing, I know. sorry)
-Links to use Backtrack:
+
+*Links to use Backtrack:*
 localhost:8000/backtrack/
 localhost:8000/backtrack/<project_id>/productbacklog
+*On using the Django shell*
+```
+$ python manage.py shell
+> import backtrackapp.models import $MODELS
+```
+And then you can add/delete/query the db. Currenly, in the db, there is a sprint and two users (Bob & Kelly)... please do not erase them (yet). I want them for testing purposes!
 
 *do not delete the polls app (yet)!!!*
 (I need it for reference)

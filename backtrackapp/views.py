@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from .forms import NewProjectForm, NewPBIForm, NewTaskForm
-from .models import Project, ProductBacklogItem
+from .models import Project, ProductBacklogItem, Sprint, Task
 
 #Index and New Project View are currently the same... delete one
 def IndexView(request):
@@ -43,7 +43,6 @@ class NewProjectView(generic.CreateView):
         'backtrackapp/index.html',
         {'projects': projects,'form': form})
 
-#Change classname to NewPBIView?
 #Maybe make separate view for just looking at the product backlog
 class ProjectPBView(generic.CreateView):
     def get(self, request, pk):
@@ -54,6 +53,31 @@ class ProjectPBView(generic.CreateView):
         return render(request, 'backtrackapp/projectpbview.html', context)
 
     def post(self, request, pk):
+        if 'addToSprint' in self.request.POST:
+            return self.addToSprint(request, pk)
+        if 'createNewPBI' in self.request.POST:
+            return self.createNewPBI(request, pk)
+        if 'deletePBI' in self.request.POST:
+            return self.deletePBI(request, pk)
+        else:
+            #this is a stub method and needs to be changed
+            print(form.errors)
+            return HttpResponse("Did not work.")
+
+    def addToSprint(self, request, pk):
+        latestSprint = Sprint.objects.latest('start_date')
+        pbi_id = request.POST.get('pbi')
+        pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+        pbi.sprint = latestSprint
+        pbi.save()
+        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+
+    def deletePBI(self, request, pk):
+        pbi_id = request.POST.get('pbi')
+        ProductBacklogItem.objects.get(pk=pbi_id).delete()
+        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+
+    def createNewPBI(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
         form = NewPBIForm(request.POST, initial={'project': project})
         if form.is_valid():
@@ -66,9 +90,5 @@ class ProjectPBView(generic.CreateView):
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
-
-        return render(request,
-        'backtrackapp/projectpbview.html',
-        {'project': project,'form': form})
 
 #class NewTaskView(generic.CreateView):
