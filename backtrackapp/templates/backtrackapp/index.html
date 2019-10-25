@@ -12,8 +12,14 @@
 {% endif %}
 
 <h2> Create new project </h2>
+<<<<<<< HEAD
+<form method="POST">{% csrf_token %}
+  {{form.as_p}}
+  <input type="submit" value="Create Project">
+=======
 <form method="POST">
   {% csrf_token %}
   {{form.as_p}}
-  <input type="submit" value="Create Project">
+<input type="submit" value="Create Project">
+>>>>>>> 0ee1427fbb6e8b839e421bb47a812145ebe6a0da
 </form>
