@@ -11,5 +11,6 @@ urlpatterns = [
     name="project_sb"),
     #path('<int:pk>/sprintarchive/', views.sprintArchive, name="sprint_archive"),
     path('<int:pk>/newtask/', views.NewTaskView.as_view(),
-    name="new_task")
+    name="new_task"),
+    path('<int:pk>/modifytask/', views.ModifyTaskView.as_view(), name="modify_task")
 ]

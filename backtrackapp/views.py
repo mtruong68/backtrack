@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from .forms import NewProjectForm, NewPBIForm, NewTaskForm
-from .models import Project, ProductBacklogItem, Sprint, Task
+from .models import Project, ProductBacklogItem, Sprint, User, Task
 
 #Index and New Project View are currently the same... delete one
 def IndexView(request):
@@ -73,6 +73,10 @@ class ProjectPBView(generic.CreateView):
         pbi.save()
         return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
 
+
+
+
+
     def deletePBI(self, request, pk):
         pbi_id = request.POST.get('pbi')
         ProductBacklogItem.objects.get(pk=pbi_id).delete()
@@ -107,17 +111,87 @@ class NewTaskView(generic.CreateView):
         return render(request, 'backtrackapp/newtask.html', context)
 
     def post(self, request, pk):
-        return self.createNewTask(request, pk)
+        if 'modifyTask' in self.request.POST:
+            return self.modifyTask(request, pk)
+        if 'deleteTask' in self.request.POST:
+            return self.deleteTask(request, pk)
+        if 'addTask' in self.request.POST:
+            return self.addTask(request, pk)
+        else:
+            #this is a stub method and needs to be changed
+            print(form.errors)
+            return HttpResponse("Did not work.")
 
-    def createNewTask(self, request, pk):
+    def deleteTask(self, request, pk):
+        task_id = request.POST.get('task')
+        Task.objects.get(pk=task_id).delete()
+        return HttpResponseRedirect(reverse('backtrack:new_task', args=(pk,)))
+
+    def modifyTask(self, request, pk):
+        task_id = request.POST.get('task')
+        return HttpResponseRedirect(reverse('backtrack:modify_task', args=(task_id,)))
+
+    def addTask(self, request, pk):
+        print(request.POST)
         pbi = get_object_or_404(ProductBacklogItem, pk=pk)
         form = NewTaskForm(request.POST, initial={"pbi":pbi})
         if form.is_valid():
             newTask = form.save(commit=False)
+            assignGroup = request.POST.get('assignment')
             newTask.pbi = pbi
+            newTask.save()
+            for assign in assignGroup:
+                newTask.assignment.add(User.objects.get(pk=assign))
             newTask.save()
             return HttpResponseRedirect(reverse('backtrack:new_task', args=(pk,)))
         else:
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
+
+class ModifyTaskView(generic.CreateView):
+    def get(self, request, pk):
+        task = get_object_or_404(Task, pk=pk)
+
+        choices = [
+            {'value': 'NS', 'status':'Not Started'},
+            {'value': 'IP', 'status':'In Progress'},
+            {'value': 'C', 'status': 'Complete'}
+        ]
+
+        for choice in choices:
+            if choice['value'] == task.status:
+                choice['selected'] = "selected"
+
+        availableUsers = User.objects.all().difference(task.assignment.all())
+
+        context = {'task':task, 'choices': choices, 'availableUsers': availableUsers}
+
+        return render(request, 'backtrackapp/modifytask.html', context)
+
+    def post(self, request, pk):
+        if 'deleteUser' in self.request.POST:
+            return self.deleteUserFromTask(request, pk)
+        if 'modifyTask' in self.request.POST:
+            return self.modifyTask(request, pk)
+
+    #check to make sure some user is assigned
+    def deleteUserFromTask(self, request, pk):
+        user_id = request.POST.get('user')
+        task = get_object_or_404(Task, pk=pk)
+        task.assignment.remove(get_object_or_404(User, pk=user_id))
+        return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))
+
+    #check to make sure that some user is assigned
+    def modifyTask(self, request, pk):
+        print(request.POST)
+        task = get_object_or_404(Task, pk=pk)
+        task.name = request.POST.get('name')
+        task.desc = request.POST.get('desc')
+        task.burndown = request.POST.get('burndown')
+        task.status = request.POST.get('status')
+        task.save()
+        assignGroup = request.POST.get('assignment')
+        for assign in assignGroup:
+            task.assignment.add(User.objects.get(pk=assign))
+        return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))

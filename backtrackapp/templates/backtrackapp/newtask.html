@@ -3,7 +3,12 @@
 
   {% for task in pbi.task_set.all %}
    <div>
-     <p><b>{{task.name}}</b>: {{task.desc}}</p>
+     <form method="POST">{% csrf_token %}
+       <p><b>{{task.name}}</b>: {{task.desc}}</p>
+       <input type="hidden" name="task" value="{{task.id}}" />
+       <input type="submit" value="modify" name="modifyTask">
+       <input type="submit" value="delete" name="deleteTask">
+      </form>
   </div>
   {% endfor %}
 
@@ -11,5 +16,5 @@
 <form method="POST">
   {% csrf_token %}
   {{form.as_p}}
-  <input type="submit" value="Add task">
+  <input type="submit" value="Add task" name="addTask">
 </form>

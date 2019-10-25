@@ -10,10 +10,3 @@
       </form>
   </div>
 {% endfor %}
-
-<form method="POST">
-  {% csrf_token %}
-  <h3>Create New PBI</h3>
-  {{form.as_p}}
-  <input type="submit" value="Create New PBI" name="createNewPBI"/>
-</form>
