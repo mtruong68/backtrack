@@ -1,4 +1,9 @@
-{% if sprint %}
+<!DOCTYPE html>
+<head>
+  <title>Sprint Backlog</title>
+</head>
+<body>
+  {% if sprint %}
   <ul>
     {% for pbi in sprint.productbacklogitem_set.all %}
     <div>
@@ -6,7 +11,9 @@
       <!-- button that goes to add task page for pbi -->
     </div>
     {% endfor %}
-  <ul>
-{% else %}
-  <h2> No Product Backlog Items in Sprint yet </h2>
-{% endif %}
+    <ul>
+      {% else %}
+      <h2> No Product Backlog Items in Sprint yet </h2>
+      {% endif %}
+    </body>
+    </html>
