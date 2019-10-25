@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from .forms import NewProjectForm, NewPBIForm, NewTaskForm
-from .models import Project, ProductBacklogItem, Sprint, Task
+from .models import Project, ProductBacklogItem, Sprint, Task, User
 
 #Index and New Project View are currently the same... delete one
 def IndexView(request):
@@ -37,6 +37,7 @@ class NewProjectView(generic.CreateView):
         if form.is_valid():
             newProject = form.save()
             newProject.save()
+            Sprint.create
             return HttpResponseRedirect(reverse('backtrack:index'))
 
         return render(request,
@@ -47,10 +48,13 @@ class NewProjectView(generic.CreateView):
 #Maybe make separate view for just looking at the product backlog
 class ProjectPBView(generic.CreateView):
     #need to sort pbi by priority and show in order of priorty
+    #figure out how to deal w initial no sprint in project
     def get(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
+        sprints = project.sprint_set.all()
+        latestSprint = sprints.latest('start_date')
         context = {'form': NewPBIForm(initial={'project': project}),
-        'project': project}
+        'project': project, 'latestSprint': latestSprint}
         return render(request, 'backtrackapp/projectpbview.html', context)
 
     def post(self, request, pk):
@@ -60,13 +64,18 @@ class ProjectPBView(generic.CreateView):
             return self.createNewPBI(request, pk)
         if 'deletePBI' in self.request.POST:
             return self.deletePBI(request, pk)
+        if 'modifyPBI' in self.request.POST:
+            pbi_id = request.POST.get('pbi')
+            return HttpResponseRedirect(reverse('backtrack:modifyPBI', args=(pbi_id,)))
         else:
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
 
     def addToSprint(self, request, pk):
-        latestSprint = Sprint.objects.latest('start_date')
+        project = get_object_or_404(Project, pk=pk)
+        sprints = project.sprint_set.all()
+        latestSprint = sprints.latest('start_date')
         pbi_id = request.POST.get('pbi')
         pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
         pbi.sprint = latestSprint
@@ -156,7 +165,7 @@ class modifyPBI(generic.CreateView):
         pbi.storypoints = request.POST.get('newSto')
         pbi.status = request.POST.get('newSta')
         pbi.save()
-        return HttpResponseRedirect(reverse('backtrack:modifyPBI', args=(pk,)))
+        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
 
 
     # def addToSprint(self, request, pk):
