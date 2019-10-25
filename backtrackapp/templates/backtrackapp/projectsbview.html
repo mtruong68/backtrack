@@ -12,3 +12,5 @@
 {% else %}
   <h2> No Product Backlog Items in Sprint yet </h2>
 {% endif %}
+
+<a href= "{% url 'backtrack:project_pb' sprint.project.id %}"> Back to Product Backlog</a>

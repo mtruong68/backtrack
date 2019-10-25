@@ -201,8 +201,9 @@ class ModifyTaskView(generic.CreateView):
         task.status = request.POST.get('status')
         task.save()
         assignGroup = request.POST.get('assignment')
-        for assign in assignGroup:
-            task.assignment.add(User.objects.get(pk=assign))
+        if assignGroup != None:
+            for assign in assignGroup:
+                task.assignment.add(User.objects.get(pk=assign))
         return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))
 
 class modifyPBI(generic.CreateView):
