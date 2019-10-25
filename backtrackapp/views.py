@@ -99,15 +99,16 @@ class SprintBacklogView(generic.DetailView):
         sprint = get_object_or_404(Sprint, pk=pk)
         return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint})
 
-    def post(self, pk, request):
-        if 'createNewTask' in self.request.POST:
-            return self.createNewTask(pk, request)
-        else:
-            #this is a stub method and needs to be changed
-            print(form.errors)
-            return HttpResponse("Did not work.")
 
-    #METHOD NOT FINISHED YET
+class NewTaskView(generic.CreateView):
+    def get(self, request, pk):
+        pbi = get_object_or_404(ProductBacklogItem, pk=pk)
+        context = {'form': NewTaskForm(initial={'pbi': pbi}), 'pbi': pbi}
+        return render(request, 'backtrackapp/newtask.html', context)
+
+    def post(self, request, pk):
+        return self.createNewTask(request, pk)
+
     def createNewTask(self, request, pk):
         pbi = get_object_or_404(ProductBacklogItem, pk=pk)
         form = NewTaskForm(request.POST, initial={"pbi":pbi})
@@ -115,7 +116,7 @@ class SprintBacklogView(generic.DetailView):
             newTask = form.save(commit=False)
             newTask.pbi = pbi
             newTask.save()
-            return HttpResponseRedirect(reverse('backtrack:project_sb', args=(pk,)))
+            return HttpResponseRedirect(reverse('backtrack:new_task', args=(pk,)))
         else:
             #this is a stub method and needs to be changed
             print(form.errors)

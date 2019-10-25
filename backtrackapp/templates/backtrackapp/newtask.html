@@ -1,0 +1,15 @@
+<h3>New Task View</h3>
+<h4>{{pbi.name}}</h4>
+
+  {% for task in pbi.task_set.all %}
+   <div>
+     <p><b>{{task.name}}</b>: {{task.desc}}</p>
+  </div>
+  {% endfor %}
+
+<h3>Add Task</h3>
+<form method="POST">
+  {% csrf_token %}
+  {{form.as_p}}
+  <input type="submit" value="Add task">
+</form>

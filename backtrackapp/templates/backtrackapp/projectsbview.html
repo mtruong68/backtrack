@@ -1,9 +1,11 @@
 {% if sprint %}
+  <h3>Sprint {{sprint.number}}</h3>
   <ul>
     {% for pbi in sprint.productbacklogitem_set.all %}
     <div>
-      <p><b>{{pbi.name}}</b>: {{pbi.desc}}</p>
-      <!-- button that goes to add task page for pbi -->
+      <p><a href="{% url 'backtrack:new_task' pbi.id %}">
+        "<b>{{pbi.name}}</b></a>
+        : {{pbi.desc}}</p>
     </div>
     {% endfor %}
   <ul>
