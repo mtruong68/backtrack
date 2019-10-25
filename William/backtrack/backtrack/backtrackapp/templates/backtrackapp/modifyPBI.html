@@ -1,22 +1,23 @@
-
 <h3>PBI {{pbi.name}}</h3>
-
-
 <form method="POST">
   {% csrf_token %}
   <h3>Modify PBI</h3>
-<div>
-<input type="hidden" name="pbi" value="{{pbi.id}}" />
-Name:<input type="text" value={{pbi.name}} name="newName"/></div>
-<div>
-Description:<input type="text" value={{pbi.desc}} name="newDesc"/></div>
-<div>
-Priority:<input type="text" value={{pbi.priority}} name="newPri"/></div>
-<div>
-Story Points:<input type="text" value={{pbi.storypoints}} name="newSto"/></div>
-<div>
-Status:<input type="text" value={{pbi.status}} name="newSta"/></div>
-
-
+  <div>
+    <input type="hidden" name="pbi" value="{{pbi.id}}"/>
+    Name:<input type="text" value={{pbi.name}} name="newName"/>
+  </div>
+  <div>
+    Description:<input type="text" value={{pbi.desc}} name="newDesc"/>
+  </div>
+  <div>
+    Priority:<input type="text" value={{pbi.priority}} name="newPri"/>
+  </div>
+  <div>
+    Story Points:<input type="text" value={{pbi.storypoints}} name="newSto"/>
+  </div>
+  <div>
+    Status:<input type="text" value={{pbi.status}} name="newSta"/>
+  </div>
   <input type="submit" value="Save" name="savePBI"/>
+  <h3>Refine PBI</h3>
 </form>
