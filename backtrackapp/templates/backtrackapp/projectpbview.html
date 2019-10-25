@@ -6,7 +6,7 @@
   <div>
       <form method="POST">{% csrf_token %}
         <p><b>{{pbi.name}}</b>: {{pbi.desc}},
-          Priority: {{pbi.priority}}, Status:{{pbi.choices.status}},
+          Priority: {{pbi.priority}}, Status:{{pbi.status}},
           Story Points: {{pbi.storypoints}}</p>
         <input type="hidden" name="pbi" value="{{pbi.id}}" />
         <input type="submit" value="Add to Sprint" name="addToSprint"/>
