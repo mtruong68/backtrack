@@ -1,0 +1,12 @@
+{% if sprint %}
+  <ul>
+    {% for pbi in sprint.productbacklogitem_set.all %}
+    <div>
+      <p><b>{{pbi.name}}</b>: {{pbi.desc}}</p>
+      <!-- button that goes to add task page for pbi -->
+    </div>
+    {% endfor %}
+  <ul>
+{% else %}
+  <h2> No Product Backlog Items in Sprint yet </h2>
+{% endif %}
