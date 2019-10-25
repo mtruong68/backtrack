@@ -1,9 +1,11 @@
 
 <h3>{{project.name}} Product Backlog</h3>
+
+
 {% for pbi in project.productbacklogitem_set.all %}
   <div>
       <form method="POST">{% csrf_token %}
-        <p><b>{{pbi.name}}</b>: {{pbi.desc}}</p>
+        <p><b><a href="{% url 'backtrack:modifyPBI' pbi.id %}">{{pbi.name}}</a></b>: {{pbi.desc}}</p>
         <input type="hidden" name="pbi" value="{{pbi.id}}" />
         <input type="submit" value="Add to Sprint" name="addToSprint"/>
         <input type="submit" value="Delete PBI" name="deletePBI"/>

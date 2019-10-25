@@ -120,3 +120,68 @@ class SprintBacklogView(generic.DetailView):
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
+
+
+
+
+
+
+
+
+#Views handling the client accessing the Product Backlog
+#Maybe make separate view for just looking at the product backlog
+class modifyPBI(generic.CreateView):
+    #need to sort pbi by priority and show in order of priorty
+    def get(self, request, pk):
+        pbi = get_object_or_404(ProductBacklogItem, pk=pk)
+        context = {'form': NewPBIForm(initial={'pbi': pbi}),
+        'pbi': pbi}
+        return render(request, 'backtrackapp/modifyPBI.html', context)
+
+    def post(self, request, pk):
+
+        if 'savePBI' in self.request.POST:
+            return self.savePBI(request, pk)
+        else:
+            #this is a stub method and needs to be changed
+            print(form.errors)
+            return HttpResponse("Did not work.")
+
+    def savePBI(self, request, pk):
+        pbi_id = request.POST.get('pbi')
+        pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+        pbi.name = request.POST.get('newName')
+        pbi.desc = request.POST.get('newDesc')
+        pbi.priority = request.POST.get('newPri')
+        pbi.storypoints = request.POST.get('newSto')
+        pbi.status = request.POST.get('newSta')
+        pbi.save()
+        return HttpResponseRedirect(reverse('backtrack:modifyPBI', args=(pk,)))
+
+
+    # def addToSprint(self, request, pk):
+    #     latestSprint = Sprint.objects.latest('start_date')
+    #     pbi_id = request.POST.get('pbi')
+    #     pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+    #     pbi.sprint = latestSprint
+    #     pbi.save()
+    #     return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+    #
+    # def deletePBI(self, request, pk):
+    #     pbi_id = request.POST.get('pbi')
+    #     ProductBacklogItem.objects.get(pk=pbi_id).delete()
+    #     return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+    #
+    # def createNewPBI(self, request, pk):
+    #     project = get_object_or_404(Project, pk=pk)
+    #     form = NewPBIForm(request.POST, initial={'project': project})
+    #     if form.is_valid():
+    #         newPBI = form.save(commit=False)
+    #         newPBI.project = project
+    #         newPBI.save()
+    #         #redirect back to product backlog view
+    #         return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+    #     else:
+    #         #this is a stub method and needs to be changed
+    #         print(form.errors)
+    #         return HttpResponse("Did not work.")
