@@ -85,7 +85,9 @@ class ProjectPBView(generic.CreateView):
 
     def deletePBI(self, request, pk):
         pbi_id = request.POST.get('pbi')
-        ProductBacklogItem.objects.get(pk=pbi_id).delete()
+        pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+        self.updatePrioritiesDelete(pk, pbi.priority)
+        pbi.delete()
         return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
 
     def createNewPBI(self, request, pk):
@@ -106,7 +108,7 @@ class ProjectPBView(generic.CreateView):
             print(form.errors)
             return HttpResponse("Did not work.")
 
-    def checkPriority(self, request, pk, pri):
+    def checkPriority(self, pk, pri):
         proj = get_object_or_404(Project, pk=pk)
         max_priority = proj.productbacklogitem_set.all().count() + 1
 
@@ -130,6 +132,13 @@ class ProjectPBView(generic.CreateView):
                     i.priority = temp + 1
                     i.save()
 
+    def updatePrioritiesDelete(self, pk, pri):
+        proj = get_object_or_404(Project, pk=pk)
+        pbis = proj.productbacklogitem_set.all()
+        for pbi in pbis:
+            if pbi.priority > pri:
+                pbi.priority = pbi.priority - 1
+                pbi.save()
 #Views handling the client accessing the Sprint Backlog
 class SprintBacklogView(generic.DetailView):
     def get(self, request, pk):
@@ -175,7 +184,7 @@ class NewTaskView(generic.CreateView):
             newTask.save()
             for assign in assignGroup:
                 newTask.assignment.add(User.objects.get(pk=assign))
-            newTask.save()
+                newTask.save()
             return HttpResponseRedirect(reverse('backtrack:new_task', args=(pk,)))
         else:
             #this is a stub method and needs to be changed
@@ -228,6 +237,7 @@ class ModifyTaskView(generic.CreateView):
         if assignGroup != None:
             for assign in assignGroup:
                 task.assignment.add(User.objects.get(pk=assign))
+                task.save()
         return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))
 
 class modifyPBI(generic.CreateView):
