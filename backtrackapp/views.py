@@ -51,10 +51,11 @@ class ProjectPBView(generic.CreateView):
     #figure out how to deal w initial no sprint in project
     def get(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
+        pbi_set = project.productbacklogitem_set.all().order_by('priority')
         sprints = project.sprint_set.all()
         latestSprint = sprints.latest('start_date')
         context = {'form': NewPBIForm(initial={'project': project}),
-        'project': project, 'latestSprint': latestSprint}
+        'project': project, 'latestSprint': latestSprint, 'pbi_set':pbi_set}
         return render(request, 'backtrackapp/projectpbview.html', context)
 
     def post(self, request, pk):
@@ -82,10 +83,6 @@ class ProjectPBView(generic.CreateView):
         pbi.save()
         return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
 
-
-
-
-
     def deletePBI(self, request, pk):
         pbi_id = request.POST.get('pbi')
         ProductBacklogItem.objects.get(pk=pbi_id).delete()
@@ -97,16 +94,43 @@ class ProjectPBView(generic.CreateView):
         if form.is_valid():
             newPBI = form.save(commit=False)
             newPBI.project = project
-            newPBI.save()
-            #redirect back to product backlog view
-            return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+            if self.checkPriority(request, pk, request.POST.get('priority')) == False:
+                return HttpResponse("Priority Out of Bounds")
+            else:
+                self.updatePriorities(request, pk, request.POST.get('priority'))
+                newPBI.save()
+                #redirect back to product backlog view
+                return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
         else:
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
 
+    def checkPriority(self, request, pk, pri):
+        proj = get_object_or_404(Project, pk=pk)
+        max_priority = proj.productbacklogitem_set.all().count() + 1
+
+        if int(pri) > max_priority or int(pri) <= 0:
+            return False
+        else:
+            return True
+
+    def updatePriorities(self, request, pk, pri):
+        proj = get_object_or_404(Project, pk=pk)
+        max_priority = proj.productbacklogitem_set.all().count() + 1
+        newPri = int(pri)
+
+        if newPri == max_priority:
+            return
+        else:
+            pbis = proj.productbacklogitem_set.all()
+            for i in pbis:
+                if i.priority >= newPri:
+                    temp = i.priority
+                    i.priority = temp + 1
+                    i.save()
+
 #Views handling the client accessing the Sprint Backlog
-#NOTE THIS IS NOT YET "COMPLETE" FORMS MUST BE INCLUDED
 class SprintBacklogView(generic.DetailView):
     def get(self, request, pk):
         sprint = get_object_or_404(Sprint, pk=pk)
@@ -207,7 +231,7 @@ class ModifyTaskView(generic.CreateView):
         return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))
 
 class modifyPBI(generic.CreateView):
-    #need to sort pbi by priority and show in order of priorty
+    #need to sort pbi by priority and show in order of priority
     def get(self, request, pk):
         pbi = get_object_or_404(ProductBacklogItem, pk=pk)
         context = {'form': NewPBIForm(initial={'pbi': pbi}),
@@ -215,7 +239,6 @@ class modifyPBI(generic.CreateView):
         return render(request, 'backtrackapp/modifyPBI.html', context)
 
     def post(self, request, pk):
-
         if 'savePBI' in self.request.POST:
             return self.savePBI(request, pk)
         else:
@@ -224,12 +247,58 @@ class modifyPBI(generic.CreateView):
             return HttpResponse("Did not work.")
 
     def savePBI(self, request, pk):
+        if self.checkPriority(request, pk) == False:
+            return HttpResponse("Priority Out of Bounds")
+        else:
+            pbi_id = request.POST.get('pbi')
+            pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+            pbi.name = request.POST.get('newName')
+            pbi.desc = request.POST.get('newDesc')
+            self.updatePriorities(request, pk)
+            pbi.storypoints = request.POST.get('newSto')
+            pbi.priority = request.POST.get('newPri')
+            pbi.status = request.POST.get('newSta')
+            pbi.save()
+            return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pbi.project.pk,)))
+
+    def checkPriority(self, request, pk):
         pbi_id = request.POST.get('pbi')
         pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
-        pbi.name = request.POST.get('newName')
-        pbi.desc = request.POST.get('newDesc')
-        pbi.priority = request.POST.get('newPri')
-        pbi.storypoints = request.POST.get('newSto')
-        pbi.status = request.POST.get('newSta')
-        pbi.save()
-        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+        max_priority = pbi.project.productbacklogitem_set.all().count() + 1
+        newPri = int(request.POST.get('newPri'))
+
+        if newPri > max_priority or newPri <= 0:
+            return False
+        else:
+            return True
+
+    def updatePriorities(self, request, pk):
+        pbi_id = request.POST.get('pbi')
+        pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+        old_priority = int(pbi.priority)
+        max_priority = pbi.project.productbacklogitem_set.all().count()
+        new_priority = int(request.POST.get('newPri'))
+
+        if old_priority == new_priority:
+            return
+
+        pbis = pbi.project.productbacklogitem_set.all()
+        print(pbis)
+        if old_priority < new_priority:
+            for i in pbis:
+                if i.priority <= new_priority and i.priority > old_priority:
+                    if i.priority == old_priority:
+                        pass
+                    else:
+                        temp = i.priority
+                        i.priority = temp - 1
+                        i.save()
+        else:
+            for i in pbis:
+                if i.priority >= new_priority and i.priority < old_priority:
+                    if i.priority == old_priority:
+                        pass
+                    else:
+                        temp = i.priority
+                        i.priority = temp + 1
+                        i.save()
