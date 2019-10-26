@@ -2,11 +2,12 @@
 Built with Python v 3.5.2 and Django 2.2.6
 
 ## current todo
-* allow deletion/modification of projects on the interface
-* allow modification/refinement of pbis on the interface
-* create/modify/add tasks
-* WRITE TESTS
-* deploy server to heroku
+* allow refinement of pbis/task on the interface
+* add sprint timing functionality, figure out what to do if a project has no sprints yet
+* create some sort of data structure to hold users for each project
+* user permissions/different roles within a project
+* ***WRITE TESTS***
+* deploy server to heroku or some other host
 * please someone... do some css magic on it... its so ugly rn
 
 To run locally on your machine:
@@ -22,16 +23,21 @@ localhost:8000/backtrack/<project_id>/productbacklog
 $ python manage.py shell
 > import backtrackapp.models import $MODELS
 ```
-And then you can add/delete/query the db. Currenly, in the db, there is a sprint and two users (Bob & Kelly)... please do not erase them (yet). I want them for testing purposes!
-
-*do not delete the polls app (yet)!!!*
-(I need it for reference)
+And then you can add/delete/query the db.
 
 Every time you make changes to the models.py for the backtrackapp (does not apply to inserting/deleting items in the database using forms/shell)
 ```
 $ python manage.py makemigrations backtrackapp
 $ python manage.py migrate
 ```
+
+If you want to drop the entire database:
+```
+find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+find . -path "*/migrations/*.pyc"  -delete
+rm db.sqlite3
+```
+or run `./dropdb.sh`
 
 If you create a new file you must restart the server
 (Does not hold true for modifying files)
