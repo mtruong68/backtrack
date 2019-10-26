@@ -37,6 +37,7 @@ find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
 find . -path "*/migrations/*.pyc"  -delete
 rm db.sqlite3
 ```
+or run `./dropdb.sh`
 
 If you create a new file you must restart the server
 (Does not hold true for modifying files)
