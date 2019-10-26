@@ -96,7 +96,7 @@ class ProjectPBView(generic.CreateView):
         if form.is_valid():
             newPBI = form.save(commit=False)
             newPBI.project = project
-            if self.checkPriority(request, pk, request.POST.get('priority')) == False:
+            if self.checkPriority(pk, request.POST.get('priority')) == False:
                 return HttpResponse("Priority Out of Bounds")
             else:
                 self.updatePriorities(request, pk, request.POST.get('priority'))
@@ -179,7 +179,7 @@ class NewTaskView(generic.CreateView):
         form = NewTaskForm(request.POST, initial={"pbi":pbi})
         if form.is_valid():
             newTask = form.save(commit=False)
-            assignGroup = request.POST.get('assignment')
+            assignGroup = request.POST.getlist('assignment')
             newTask.pbi = pbi
             newTask.save()
             for assign in assignGroup:
@@ -233,7 +233,7 @@ class ModifyTaskView(generic.CreateView):
         task.burndown = request.POST.get('burndown')
         task.status = request.POST.get('status')
         task.save()
-        assignGroup = request.POST.get('assignment')
+        assignGroup = request.POST.getlist('assignment')
         if assignGroup != None:
             for assign in assignGroup:
                 task.assignment.add(User.objects.get(pk=assign))

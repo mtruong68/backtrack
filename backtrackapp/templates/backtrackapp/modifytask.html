@@ -35,5 +35,5 @@
   <input type="submit" value="Modify Task" name="modifyTask">
 </form>
 
-<a href="{% url 'backtrack:new_task' task.id %}">Back to PBI Task View</a>
+<a href="{% url 'backtrack:new_task' task.pbi.id %}">Back to PBI Task View</a>
 <a href="{% url 'backtrack:project_sb' task.pbi.sprint.id %}">Back to Sprint Backlog</a>
