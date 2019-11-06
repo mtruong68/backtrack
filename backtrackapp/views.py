@@ -1,10 +1,16 @@
 from django.views import generic
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
-from .forms import NewProjectForm, NewPBIForm, NewTaskForm
+from .forms import NewProjectForm, NewPBIForm, NewTaskForm, CustomUserCreationForm
 from .models import Project, ProductBacklogItem, Sprint, User, Task
+
+
+class SignUpView(generic.CreateView):
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy('login')
+    template_name = 'signup.html'
 
 #Index and New Project View are currently the same... delete one
 def IndexView(request):
@@ -43,6 +49,8 @@ class NewProjectView(generic.CreateView):
         return render(request,
         'backtrackapp/index.html',
         {'projects': projects,'form': form})
+
+
 
 #Views handling the client accessing the Product Backlog
 #Maybe make separate view for just looking at the product backlog

@@ -1,7 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 import datetime
 
-class User(models.Model):
+class User(AbstractUser):
     name = models.CharField(max_length=256)
     def __str__(self):
         return self.name
@@ -19,7 +20,7 @@ class Sprint(models.Model):
     project = models.ForeignKey(Project,
     on_delete = models.CASCADE)
     def __str__(self):
-        return str(self.number)        
+        return str(self.number)
 
 class ProductBacklogItem(models.Model):
     STATUS = (

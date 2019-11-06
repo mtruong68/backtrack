@@ -1,5 +1,19 @@
 from django import forms
-from .models import Project, ProductBacklogItem, Task
+from .models import Project, ProductBacklogItem, Task, User
+
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+
+class CustomUserCreationForm(UserCreationForm):
+
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+class CustomUserChangeForm(UserChangeForm):
+
+    class Meta:
+        model = User
+        fields = ('username', 'email')
 
 class NewProjectForm(forms.ModelForm):
     class Meta:
