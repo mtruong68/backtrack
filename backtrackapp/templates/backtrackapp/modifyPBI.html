@@ -1,41 +1,49 @@
-<!DOCTYPE html>
 <head>
-	<title>modifyPBI</title>
+  <title>Modify PBI</title>
 </head>
-<style type = "text/css">
-.mydiv {
-	margin: auto;
-	width: 60%;
-	border: 3px solid #8AC007;
-	padding: 10px;
-}
-body {
-	font-family: "Trebuchet MS", Helvetica, sans-serif;
-}
+
+<style>
+  input {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+  }
+
+  .mydiv {
+    margin: auto;
+    width: auto;
+    border: 3px solid black;
+    padding: 10px;
+  }
+
+  body {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+  }
 </style>
-<body id="page" onload="load()">
-	<h3>Modify PBI</h3>
-	<div class = "mydiv">
-		<form method="POST">{% csrf_token %}
-			<h3>PBI {{pbi.name}}</h3>
-			<input type="hidden" name="pbi" value="{{pbi.id}}">
-			<div>
-				Name:<input type="text" value={{pbi.name}} name="newName">
-			</div>
-			<div>
-				Description:<input type="text" value={{pbi.desc}} name="newDesc">
-			</div>
-			<div>
-				Priority:<input type="text" value={{pbi.priority}} name="newPri">
-			</div>
-			<div>
-				Story Points:<input type="text" value={{pbi.storypoints}} name="newSto">
-			</div>
-			<div>
-				Status:<input type="text" value={{pbi.status}} name="newSta">
-			</div>
-			<input type="submit" value="Save" name="savePBI">
-		</form>
-	</div>
+
+<body>
+
+  <h3>Modify PBI</h3>
+
+  <div class = "mydiv">
+    <form method="POST">{% csrf_token %}
+      <h3>PBI {{pbi.name}}</h3>
+      <input type="hidden" name="pbi" value="{{pbi.id}}">
+      <div>
+        Name:<input type="text" value={{pbi.name}} name="newName">
+      </div><br>
+      <div>
+        Description:<input type="text" value={{pbi.desc}} name="newDesc">
+      </div><br>
+      <div>
+        Priority:<input type="text" value={{pbi.priority}} name="newPri">
+      </div><br>
+      <div>
+        Story Points:<input type="text" value={{pbi.storypoints}} name="newSto">
+      </div><br>
+      <div>
+        Status:<input type="text" value={{pbi.status}} name="newSta">
+      </div><br>
+      <input type="submit" value="Save" name="savePBI">
+    </form>
+  </div>
+
 </body>
-</html>
