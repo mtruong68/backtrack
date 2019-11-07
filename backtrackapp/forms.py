@@ -1,5 +1,5 @@
 from django import forms
-from .models import Project, ProductBacklogItem, Task, User
+from .models import Project, ProductBacklogItem, Task, User, ProjectTeam
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
@@ -8,14 +8,16 @@ class CustomUserCreationForm(UserCreationForm):
         model = User
         fields = ('username', 'email', 'name')
 
-class CustomUserChangeForm(UserChangeForm):
+class ProjectTeamForm(forms.ModelForm):
     class Meta:
-        model = User
-        fields = ('username', 'email')
+        model = ProjectTeam
+        prefix = "teamForm"
+        exclude = ['project','product_owner']
 
 class NewProjectForm(forms.ModelForm):
     class Meta:
         model = Project
+        prefix = "projectForm"
         fields = '__all__'
         labels = {
         "desc": "Description"

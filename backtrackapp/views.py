@@ -3,66 +3,104 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 
-from .forms import NewProjectForm, NewPBIForm, NewTaskForm, CustomUserCreationForm
+from .forms import NewProjectForm, NewPBIForm, NewTaskForm, ProjectTeamForm, CustomUserCreationForm
 from .models import Project, ProductBacklogItem, Sprint, User, Task
-
 
 class SignUpView(generic.CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
     template_name = 'signup.html'
 
-#Index and New Project View are currently the same... delete one
 #We need to create different index views based on the type of role the user has
 
 #if no current project or is the product owner, show the product backlog first
 #if a developer, show the task view
 #do the manager stuff later
-
-def IndexView(request):
-    user = request.user
-    if user.is_authenticated:
-        projects = Project.objects.all()
-        form = NewProjectForm()
-
-        if request.method == 'POST':
-            form1 = NewProjectForm(request.POST, prefix="projectForm")
-            form2 = ProjectTeamForm(request.POST, prefix="teamForm")
-            if form.is_valid():
-                newProject = form.save()
-                newProject.save()
-                #use backtrack instead of backtrackapp bc of app name specified in urls
-                return HttpResponseRedirect(reverse('backtrack:index'))
-        else:
-            form = NewProjectForm()
-
-        return render(request,
-        'backtrackapp/index.html',
-        {'form': form,
-        'projects': projects})
-    else:
-        return HttpResponseRedirect(reverse('login'))
-
-class ProjectView(generic.View):
+class IndexView(generic.View):
     def get(self, request):
         user = request.user
         if user.is_authenticated:
-            context = {'form': NewProjectForm()}
-            return render(request, 'backtrackapp/index.html', context)
+            return HttpResponse("Hi")
+        else:
+            return HttpResponseRedirect(reverse('login'))
+
+#Views handling the client creating a New Project
+class NewProjectView(generic.View):
+    def get(self, request):
+        user = request.user
+        if user.is_authenticated:
+            if user.current_project != None:
+                #if a user currently has a current project, do not allow them access to forms to create new projects
+                return HttpResponseRedirect(reverse('backtrack:index'))
+            else:
+                projects = Project.objects.all()
+                projectForm = NewProjectForm()
+                teamForm = ProjectTeamForm()
+                teamForm.fields['scrum_master'].queryset = User.objects.filter(current_project=None).exclude(pk=user.pk)
+                teamForm.fields['dev_team'].queryset = User.objects.filter(current_project=None).exclude(pk=user.pk)
+
+                return render(request,
+                'backtrackapp/newproject.html',
+                {'projectForm': projectForm, 'teamForm': teamForm, 'projects': projects})
         else:
             return HttpResponseRedirect(reverse('login'))
 
     def post(self, request):
-        form = NewProjectForm(request.POST)
-        projects = Project.objects.all()
-        if form.is_valid():
-            newProject = form.save()
+        user = request.user
+        projectForm = NewProjectForm(request.POST)
+        teamForm = ProjectTeamForm(request.POST)
+
+        if self.checkMembers(request, user) == False:
+            return HttpResponse("Form is incorrect")
+
+        if teamForm.is_valid() and projectForm.is_valid():
+            newProject = projectForm.save()
             newProject.save()
-            return HttpResponseRedirect(reverse('index'))
+            newTeam = teamForm.save(commit=False)
+            newTeam.project = newProject
+            newTeam.product_owner = user
+            newTeam.save()
+            self.update_dev_team(request, newTeam)
+            self.update_team_current_project(newTeam)
+            return HttpResponseRedirect(reverse('backtrack:project_pb', args=(newProject.id,)))
 
         return render(request,
-        'backtrackapp/index.html',
-        {'projects': projects,'form': form})
+        'backtrackapp/newproject.html',
+        {'projectForm': projectForm, 'teamForm': teamForm})
+
+    #Will return true if there are no duplicates selected project team and all
+    #selected members are currently available (current_project = false)
+    def checkMembers(self, request, user):
+        dev_team = request.POST.getlist('dev_team')
+        dev_team.append(request.POST.get('scrum_master'))
+        dev_team.append(str(user.id))
+        result = True if len(dev_team) == len(set(dev_team)) else False
+
+        for member_id in dev_team:
+            member = get_object_or_404(User, pk=int(member_id))
+            if member.current_project != None:
+                return False
+
+        return result
+
+    #I do not understand why saving the form does not work in this context
+    #but here is a dumb workaround method
+    def update_dev_team(self, request, newTeam):
+        dev_team = request.POST.getlist('dev_team')
+        for member_id in dev_team:
+            newTeam.dev_team.add(User.objects.get(pk=int(member_id)))
+            newTeam.save()
+
+    def update_team_current_project(self, newTeam):
+        project = newTeam.project
+        newTeam.product_owner.current_project = project
+        newTeam.product_owner.save()
+        newTeam.scrum_master.current_project = project
+        newTeam.scrum_master.save()
+        for dev in newTeam.dev_team.all():
+            print(dev.name)
+            dev.current_project = project
+            dev.save()
 
 #Views handling the client accessing the Product Backlog
 #Maybe make separate view for just looking at the product backlog
