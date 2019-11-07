@@ -4,13 +4,15 @@ Built with Python v 3.5.2 and Django 2.2.6
 ## current todo
 * add sprint timing functionality, figure out what to do if a project has no sprints yet
 * change task view so that it looks good
-* write scripts for making test database (all you should need is users)
 
 * create index views for users (devs and product owners)
+* prevent users from seeing product/sprint backlogs that they were not assigned to
+* prevent users who are not product owners from adding pbi
+
+* clean up the code!!! clean up task/pbi form
+* figure out the many-to-many manager thing
 
 * incorporate sprint things to project form
-
-* prevent users from seeing product/sprint backlogs that they were not assigned to
 * allow deletion of project
 * allow modification of project (can add or delete users on dev team/scrum master)
 
