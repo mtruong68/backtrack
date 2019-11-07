@@ -1,21 +1,40 @@
 
 <h3><a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}}</a> Product Backlog</h3>
-<h4><a href="{% url 'backtrack:project_sb' latestSprint %}">Sprint Backlog</a></h4>
+{% if latestSprint %}
+  <h4><a href="{% url 'backtrack:project_sb' latestSprint %}">Sprint Backlog</a></h4>
+{% endif %}
 
 
-{% for pbi in pbi_set %}
-  <div>
-      <form method="POST">{% csrf_token %}
-        <p><b>{{pbi.name}}</b>: {{pbi.desc}},
-          Priority: {{pbi.priority}}, Status:{{pbi.status}},
-          Story Points: {{pbi.storypoints}}</p>
-        <input type="hidden" name="pbi" value="{{pbi.id}}" />
-        <input type="submit" value="Add to Sprint" name="addToSprint"/>
-        <input type="submit" value="Delete PBI" name="deletePBI"/>
-        <input type="submit" value="Modify PBI" name="modifyPBI"/>
-      </form>
-  </div>
-{% endfor %}
+<table>
+  <tr>
+  <th>Priority</th>
+  <th>Name</th>
+  <th>Description</th>
+  <th>Status</th>
+  <th>Story Points</th>
+  <th>Cumulative Story Points</th>
+  </tr>
+
+  {% for el in pbi_cum_points_list %}
+  <tr>
+  <td>{{el.pbi.priority}}</td>
+  <td>{{el.pbi.name}}</td>
+  <td>{{el.pbi.desc}}</td>
+  <td>{{el.pbi.status}}</td>
+  <td>{{el.pbi.storypoints}}</td>
+  <td>{{el.cum_points}}</td>
+  <td>
+  <form method="POST">{% csrf_token %}
+    <input type="hidden" name="pbi" value="{{el.pbi.id}}" />
+    <input type="submit" value="Add to Sprint" name="addToSprint"/>
+    <input type="submit" value="Delete PBI" name="deletePBI"/>
+    <input type="submit" value="Modify PBI" name="modifyPBI"/>
+  </form>
+  </td>
+  <tr>
+  {% endfor %}
+
+</table>
 
 <form method="POST">
   {% csrf_token %}

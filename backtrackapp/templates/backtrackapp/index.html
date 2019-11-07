@@ -1,19 +1,23 @@
-{% if projects %}
-  <ul>
-    {% for project in projects %}
-    <div>
-      <h3><a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}}</a></h3>
-      <p>{{project.desc}}</p>
-    </div>
-    {% endfor %}
-  <ul>
-{% else %}
-  <h2> No projects currently </h2>
+{% if user.current_project %}
+  <h3><a href="{% url 'backtrack:project_pb' current_project.id %}">{{current_project.name}}</a></h3>
 {% endif %}
 
-<h2> Create new project </h2>
-<form method="POST">
-  {% csrf_token %}
-  {{form.as_p}}
-<input type="submit" value="Create Project">
-</form>
+  {% if projects %}
+    <ul>
+      {% for project in projects %}
+      <div>
+        <h3><a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}}</a></h3>
+        <p>{{project.desc}}</p>
+      </div>
+      {% endfor %}
+    <ul>
+  {% else %}
+    <h2> No projects currently </h2>
+  {% endif %}
+
+  <h2> Create new project </h2>
+  <form method="POST">
+    {% csrf_token %}
+    {{form.as_p}}
+  <input type="submit" value="Create Project">
+  </form>

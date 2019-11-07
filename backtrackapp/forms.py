@@ -4,13 +4,11 @@ from .models import Project, ProductBacklogItem, Task, User
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 class CustomUserCreationForm(UserCreationForm):
-
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = ('username', 'email', 'name')
 
 class CustomUserChangeForm(UserChangeForm):
-
     class Meta:
         model = User
         fields = ('username', 'email')

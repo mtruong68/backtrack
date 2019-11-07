@@ -5,7 +5,8 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-  Hi {{ user.username }}!
+  Hi, {{ user.name }}!
+  <p><a href="{% url 'backtrack:index' %}"> Projects </a></p>
   <p><a href="{% url 'logout' %}">logout</a></p>
 {% else %}
   <p>You are not logged in</p>

@@ -13,29 +13,44 @@ class SignUpView(generic.CreateView):
     template_name = 'signup.html'
 
 #Index and New Project View are currently the same... delete one
-def IndexView(request):
-    projects = Project.objects.all()
-    form = NewProjectForm()
+#We need to create different index views based on the type of role the user has
 
-    if request.method == 'POST':
-        form = NewProjectForm(request.POST)
-        if form.is_valid():
-            newProject = form.save()
-            newProject.save()
-            #use backtrack instead of backtrackapp bc of app name specified in urls
-            return HttpResponseRedirect(reverse('backtrack:index'))
-    else:
+#if no current project or is the product owner, show the product backlog first
+#if a developer, show the task view
+#do the manager stuff later
+
+def IndexView(request):
+    user = request.user
+    if user.is_authenticated:
+        projects = Project.objects.all()
         form = NewProjectForm()
 
-    return render(request,
-    'backtrackapp/index.html',
-    {'form': form,
-    'projects': projects})
+        if request.method == 'POST':
+            form1 = NewProjectForm(request.POST, prefix="projectForm")
+            form2 = ProjectTeamForm(request.POST, prefix="teamForm")
+            if form.is_valid():
+                newProject = form.save()
+                newProject.save()
+                #use backtrack instead of backtrackapp bc of app name specified in urls
+                return HttpResponseRedirect(reverse('backtrack:index'))
+        else:
+            form = NewProjectForm()
 
-class NewProjectView(generic.CreateView):
+        return render(request,
+        'backtrackapp/index.html',
+        {'form': form,
+        'projects': projects})
+    else:
+        return HttpResponseRedirect(reverse('login'))
+
+class ProjectView(generic.View):
     def get(self, request):
-        context = {'form': NewProjectForm()}
-        return render(request, 'backtrackapp/index.html', context)
+        user = request.user
+        if user.is_authenticated:
+            context = {'form': NewProjectForm()}
+            return render(request, 'backtrackapp/index.html', context)
+        else:
+            return HttpResponseRedirect(reverse('login'))
 
     def post(self, request):
         form = NewProjectForm(request.POST)
@@ -43,28 +58,46 @@ class NewProjectView(generic.CreateView):
         if form.is_valid():
             newProject = form.save()
             newProject.save()
-            Sprint.create
-            return HttpResponseRedirect(reverse('backtrack:index'))
+            return HttpResponseRedirect(reverse('index'))
 
         return render(request,
         'backtrackapp/index.html',
         {'projects': projects,'form': form})
 
-
-
 #Views handling the client accessing the Product Backlog
 #Maybe make separate view for just looking at the product backlog
-class ProjectPBView(generic.CreateView):
-    #need to sort pbi by priority and show in order of priorty
-    #figure out how to deal w initial no sprint in project
+class ProjectPBView(generic.View):
     def get(self, request, pk):
-        project = get_object_or_404(Project, pk=pk)
-        pbi_set = project.productbacklogitem_set.all().order_by('priority')
-        sprints = project.sprint_set.all()
-        latestSprint = sprints.latest('start_date')
-        context = {'form': NewPBIForm(initial={'project': project}),
-        'project': project, 'latestSprint': latestSprint, 'pbi_set':pbi_set}
-        return render(request, 'backtrackapp/projectpbview.html', context)
+        user = request.user
+        if user.is_authenticated:
+            project = get_object_or_404(Project, pk=pk)
+
+            #sort pbi by priority and then calculate cumulative point total
+            pbi_cum_points_list = []
+            pbi_set = project.productbacklogitem_set.all().order_by('priority')
+            total_sum = 0
+            for pbi in pbi_set:
+                pbi_cum_points_set = {}
+                pbi_cum_points_set["pbi"] = pbi
+                total_sum += pbi.storypoints
+                pbi_cum_points_set["cum_points"] = total_sum
+                pbi_cum_points_list.append(pbi_cum_points_set)
+
+            #get the latest sprint and show the sprint backlog of that sprint
+            sprints = project.sprint_set.all()
+            if len(sprints) > 0:
+                latestSprint = sprints.latest('start_date')
+            else:
+                latestSprint = None
+
+            context = {'form': NewPBIForm(initial={'project': project}),
+            'project': project, 'latestSprint': latestSprint,
+            'pbi_cum_points_list': pbi_cum_points_list}
+
+            return render(request, 'backtrackapp/projectpbview.html', context)
+        else:
+            return HttpResponseRedirect(reverse('login'))
+
 
     def post(self, request, pk):
         if 'addToSprint' in self.request.POST:
@@ -147,18 +180,27 @@ class ProjectPBView(generic.CreateView):
             if pbi.priority > pri:
                 pbi.priority = pbi.priority - 1
                 pbi.save()
+
 #Views handling the client accessing the Sprint Backlog
-class SprintBacklogView(generic.DetailView):
+class SprintBacklogView(generic.View):
     def get(self, request, pk):
-        sprint = get_object_or_404(Sprint, pk=pk)
-        return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint})
+        user = request.user
+        if user.is_authenticated:
+            sprint = get_object_or_404(Sprint, pk=pk)
+            return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint})
+        else:
+            return HttpResponseRedirect(reverse('login'))
 
 
-class NewTaskView(generic.CreateView):
+class NewTaskView(generic.View):
     def get(self, request, pk):
-        pbi = get_object_or_404(ProductBacklogItem, pk=pk)
-        context = {'form': NewTaskForm(initial={'pbi': pbi}), 'pbi': pbi}
-        return render(request, 'backtrackapp/newtask.html', context)
+        user = request.user
+        if user.is_authenticated:
+            pbi = get_object_or_404(ProductBacklogItem, pk=pk)
+            context = {'form': NewTaskForm(initial={'pbi': pbi}), 'pbi': pbi}
+            return render(request, 'backtrackapp/newtask.html', context)
+        else:
+            return HttpResponseRedirect(reverse('login'))
 
     def post(self, request, pk):
         if 'modifyTask' in self.request.POST:
@@ -199,25 +241,28 @@ class NewTaskView(generic.CreateView):
             print(form.errors)
             return HttpResponse("Did not work.")
 
-class ModifyTaskView(generic.CreateView):
+class ModifyTaskView(generic.View):
     def get(self, request, pk):
-        task = get_object_or_404(Task, pk=pk)
+        user = request.user
+        if user.is_authenticated:
+            task = get_object_or_404(Task, pk=pk)
+            choices = [
+                {'value': 'NS', 'status':'Not Started'},
+                {'value': 'IP', 'status':'In Progress'},
+                {'value': 'C', 'status': 'Complete'}
+            ]
 
-        choices = [
-            {'value': 'NS', 'status':'Not Started'},
-            {'value': 'IP', 'status':'In Progress'},
-            {'value': 'C', 'status': 'Complete'}
-        ]
+            for choice in choices:
+                if choice['value'] == task.status:
+                    choice['selected'] = "selected"
 
-        for choice in choices:
-            if choice['value'] == task.status:
-                choice['selected'] = "selected"
+            availableUsers = User.objects.all().difference(task.assignment.all())
 
-        availableUsers = User.objects.all().difference(task.assignment.all())
+            context = {'task':task, 'choices': choices, 'availableUsers': availableUsers}
 
-        context = {'task':task, 'choices': choices, 'availableUsers': availableUsers}
-
-        return render(request, 'backtrackapp/modifytask.html', context)
+            return render(request, 'backtrackapp/modifytask.html', context)
+        else:
+            return HttpResponseRedirect(reverse('login'))
 
     def post(self, request, pk):
         if 'deleteUser' in self.request.POST:
@@ -248,13 +293,17 @@ class ModifyTaskView(generic.CreateView):
                 task.save()
         return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))
 
-class modifyPBI(generic.CreateView):
+class ModifyPBI(generic.View):
     #need to sort pbi by priority and show in order of priority
     def get(self, request, pk):
-        pbi = get_object_or_404(ProductBacklogItem, pk=pk)
-        context = {'form': NewPBIForm(initial={'pbi': pbi}),
-        'pbi': pbi}
-        return render(request, 'backtrackapp/modifyPBI.html', context)
+        user = request.user
+        if user.is_authenticated:
+            pbi = get_object_or_404(ProductBacklogItem, pk=pk)
+            context = {'form': NewPBIForm(initial={'pbi': pbi}),
+            'pbi': pbi}
+            return render(request, 'backtrackapp/modifyPBI.html', context)
+        else:
+            return HttpResponseRedirect(reverse('login'))
 
     def post(self, request, pk):
         if 'savePBI' in self.request.POST:
@@ -282,7 +331,7 @@ class modifyPBI(generic.CreateView):
     def checkPriority(self, request, pk):
         pbi_id = request.POST.get('pbi')
         pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
-        max_priority = pbi.project.productbacklogitem_set.all().count() + 1
+        max_priority = pbi.project.productbacklogitem_set.all().count()
         newPri = int(request.POST.get('newPri'))
 
         if newPri > max_priority or newPri <= 0:
