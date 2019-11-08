@@ -1,0 +1,20 @@
+
+<h3> <a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}} </a>create Sprint</h3>
+
+{% load backtrackapp_extras %}
+
+
+
+<h3>Create Sprint {{project.sprint_set.all.count|add:1}}</h3>
+
+<form method="POST">
+
+{% csrf_token %}
+
+{{form.as_p}}
+
+<input type="submit" value="Create" name="createSprint">
+
+
+
+</form>
