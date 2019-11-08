@@ -64,6 +64,7 @@ class Task(models.Model):
     status = models.CharField(max_length=2, choices=STATUS)
     pbi = models.ForeignKey(ProductBacklogItem,
     on_delete = models.CASCADE)
+    #assignment = models.ForeignKey(User, on_delete=models.SET_NULL, null = true)
     assignment = models.ManyToManyField(User)
 
     def __str__(self):

@@ -6,6 +6,9 @@ from django.urls import reverse, reverse_lazy
 from .forms import NewProjectForm, NewPBIForm, NewTaskForm, ProjectTeamForm, CustomUserCreationForm
 from .models import Project, ProductBacklogItem, Sprint, User, ProjectTeam, Task
 
+from projectUpdater import backtrackscheduler, updater
+import datetime
+
 #Sees if user has access to a project by looking into a project's project team
 #Returns true if user in a project team, else, false.
 def has_access(user, project_pk):
@@ -44,6 +47,17 @@ class SignUpView(generic.CreateView):
     success_url = reverse_lazy('login')
     template_name = 'signup.html'
 
+class TestScheduleView(generic.CreateView):
+    def get(self, request):
+        return render(request,
+        'backtrackapp/testschedule.html', {})
+
+    def post(self, request):
+        updater.add_job(datetime.datetime.now())
+        return render(request,
+        'backtrackapp/testschedule.html', {})
+
+
 #We need to create different index views based on the type of role the user has
 #if no current project or is the product owner, show the product backlog first
 #if a developer, show the task view
@@ -52,6 +66,10 @@ class IndexView(generic.View):
     def get(self, request):
         user = request.user
         if user.is_authenticated:
+            if user.current_project == None:
+                return HttpResponseRedirect(reverse('backtrack:new_project'))
+            else:
+                return HttpResponseRedirect(reverse('backtrack:project_pb', args=(user.current_project.pk)))
             return HttpResponse("Hi")
         else:
             return HttpResponseRedirect(reverse('login'))
@@ -335,7 +353,8 @@ class ModifyTaskView(generic.View):
                     if choice['value'] == task.status:
                         choice['selected'] = "selected"
 
-                availableUsers = User.objects.all().difference(task.assignment.all())
+                availableUsers = User.objects.filter(current_project=task.pbi.project).difference(task.assignment.all())
+
                 context = {'task':task, 'choices': choices, 'availableUsers': availableUsers}
                 return render(request, 'backtrackapp/modifytask.html', context)
             else:
@@ -358,8 +377,10 @@ class ModifyTaskView(generic.View):
 
     #check to make sure that some user is assigned
     def modifyTask(self, request, pk):
-        print(request.POST)
+
         task = get_object_or_404(Task, pk=pk)
+        #modifiedTask = NewTaskForm(request.POST, initial={'pbi':task.pbi})
+
         task.name = request.POST.get('name')
         task.desc = request.POST.get('desc')
         task.burndown = request.POST.get('burndown')

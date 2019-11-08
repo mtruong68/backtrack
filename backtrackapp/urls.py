@@ -13,5 +13,6 @@ urlpatterns = [
     name="new_task"),
     path('<int:pk>/modifytask/', views.ModifyTaskView.as_view(), name="modify_task"),
 
-    path('signup/', views.SignUpView.as_view(), name='signup'),
+    path('signup/', views.SignUpView.as_view(), name='sign_up'),
+    path('schedule', views.TestScheduleView.as_view(), name='test_schedule')
 ]

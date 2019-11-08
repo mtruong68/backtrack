@@ -20,8 +20,9 @@ Built with Python v 3.5.2 and Django 2.2.6
 * deploy server to heroku or some other host
 * please someone... do some css magic on it... its so ugly rn
 
-To run locally on your machine:
-`$ python manage.py runserver`
+To run locally on your machine: (need the noreload option to prevent the scheduler running twice, as is default in the debug option)
+If you add the noreload option, you have to restart the server everytime there are changes
+`$ python manage.py runserver --noreload`
 
 Note: Backtrack is the project name, backtrackapp is the app name (confusing, I know. sorry)
 
