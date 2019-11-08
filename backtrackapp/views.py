@@ -1,10 +1,43 @@
 from django.views import generic
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 
 from .forms import NewProjectForm, NewPBIForm, NewTaskForm, ProjectTeamForm, CustomUserCreationForm
-from .models import Project, ProductBacklogItem, Sprint, User, Task
+from .models import Project, ProductBacklogItem, Sprint, User, ProjectTeam, Task
+
+#Sees if user has access to a project by looking into a project's project team
+#Returns true if user in a project team, else, false.
+def has_access(user, project_pk):
+    project = get_object_or_404(Project, pk=project_pk)
+    pt = ProjectTeam.objects.filter(project=project).first()
+    if pt.scrum_master == user or pt.product_owner == user:
+        return True
+    for dev in pt.dev_team.all():
+        if dev == user:
+            return True
+    return False
+
+#Sees if user has permission to add/modify/delete PBI
+#True if user is product owner and it is their current project
+def is_productowner(user, project_pk):
+    access = False
+    project = get_object_or_404(Project, pk=project_pk)
+    pt = ProjectTeam.objects.filter(project=project).first()
+    if pt.product_owner == user and user.current_project == project:
+        return True
+    return False
+
+#Sees if user has permission to add/modify/delete Task
+#True if user is on the dev team and is their current project
+def is_dev(user, project_pk):
+    access = False
+    project = get_object_or_404(Project, pk=project_pk)
+    pt = ProjectTeam.objects.filter(project=project).first()
+    for dev in pt.dev_team.all():
+        if dev == user and user.current_project == project:
+            return True
+    return False
 
 class SignUpView(generic.CreateView):
     form_class = CustomUserCreationForm
@@ -12,7 +45,6 @@ class SignUpView(generic.CreateView):
     template_name = 'signup.html'
 
 #We need to create different index views based on the type of role the user has
-
 #if no current project or is the product owner, show the product backlog first
 #if a developer, show the task view
 #do the manager stuff later
@@ -108,31 +140,34 @@ class ProjectPBView(generic.View):
     def get(self, request, pk):
         user = request.user
         if user.is_authenticated:
-            project = get_object_or_404(Project, pk=pk)
+            if has_access(user, pk):
+                project = get_object_or_404(Project, pk=pk)
 
-            #sort pbi by priority and then calculate cumulative point total
-            pbi_cum_points_list = []
-            pbi_set = project.productbacklogitem_set.all().order_by('priority')
-            total_sum = 0
-            for pbi in pbi_set:
-                pbi_cum_points_set = {}
-                pbi_cum_points_set["pbi"] = pbi
-                total_sum += pbi.storypoints
-                pbi_cum_points_set["cum_points"] = total_sum
-                pbi_cum_points_list.append(pbi_cum_points_set)
+                #sort pbi by priority and then calculate cumulative point total
+                pbi_cum_points_list = []
+                pbi_set = project.productbacklogitem_set.all().order_by('priority')
+                total_sum = 0
+                for pbi in pbi_set:
+                    pbi_cum_points_set = {}
+                    pbi_cum_points_set["pbi"] = pbi
+                    total_sum += pbi.storypoints
+                    pbi_cum_points_set["cum_points"] = total_sum
+                    pbi_cum_points_list.append(pbi_cum_points_set)
 
-            #get the latest sprint and show the sprint backlog of that sprint
-            sprints = project.sprint_set.all()
-            if len(sprints) > 0:
-                latestSprint = sprints.latest('start_date')
+                #get the latest sprint and show the sprint backlog of that sprint
+                sprints = project.sprint_set.all()
+                if len(sprints) > 0:
+                    latestSprint = sprints.latest('start_date')
+                else:
+                    latestSprint = None
+
+                context = {'form': NewPBIForm(initial={'project': project}),
+                'project': project, 'latestSprint': latestSprint,
+                'pbi_cum_points_list': pbi_cum_points_list}
+
+                return render(request, 'backtrackapp/projectpbview.html', context)
             else:
-                latestSprint = None
-
-            context = {'form': NewPBIForm(initial={'project': project}),
-            'project': project, 'latestSprint': latestSprint,
-            'pbi_cum_points_list': pbi_cum_points_list}
-
-            return render(request, 'backtrackapp/projectpbview.html', context)
+                raise Http404("You do not have access to this project")
         else:
             return HttpResponseRedirect(reverse('login'))
 
@@ -225,7 +260,10 @@ class SprintBacklogView(generic.View):
         user = request.user
         if user.is_authenticated:
             sprint = get_object_or_404(Sprint, pk=pk)
-            return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint})
+            if has_access(user, sprint.project.pk):
+                return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint})
+            else:
+                return Http404("You do not have access to this project")
         else:
             return HttpResponseRedirect(reverse('login'))
 
@@ -235,8 +273,11 @@ class NewTaskView(generic.View):
         user = request.user
         if user.is_authenticated:
             pbi = get_object_or_404(ProductBacklogItem, pk=pk)
-            context = {'form': NewTaskForm(initial={'pbi': pbi}), 'pbi': pbi}
-            return render(request, 'backtrackapp/newtask.html', context)
+            if has_access(user, pbi.project.pk):
+                context = {'form': NewTaskForm(initial={'pbi': pbi}), 'pbi': pbi}
+                return render(request, 'backtrackapp/newtask.html', context)
+            else:
+                return Http404("You do not have access to this project")
         else:
             return HttpResponseRedirect(reverse('login'))
 
@@ -284,21 +325,21 @@ class ModifyTaskView(generic.View):
         user = request.user
         if user.is_authenticated:
             task = get_object_or_404(Task, pk=pk)
-            choices = [
-                {'value': 'NS', 'status':'Not Started'},
-                {'value': 'IP', 'status':'In Progress'},
-                {'value': 'C', 'status': 'Complete'}
-            ]
+            if has_access(user, task.pbi.project.pk):
+                choices = [
+                    {'value': 'NS', 'status':'Not Started'},
+                    {'value': 'IP', 'status':'In Progress'},
+                    {'value': 'C', 'status': 'Complete'}
+                ]
+                for choice in choices:
+                    if choice['value'] == task.status:
+                        choice['selected'] = "selected"
 
-            for choice in choices:
-                if choice['value'] == task.status:
-                    choice['selected'] = "selected"
-
-            availableUsers = User.objects.all().difference(task.assignment.all())
-
-            context = {'task':task, 'choices': choices, 'availableUsers': availableUsers}
-
-            return render(request, 'backtrackapp/modifytask.html', context)
+                availableUsers = User.objects.all().difference(task.assignment.all())
+                context = {'task':task, 'choices': choices, 'availableUsers': availableUsers}
+                return render(request, 'backtrackapp/modifytask.html', context)
+            else:
+                return Http404("You do not have access to this project")
         else:
             return HttpResponseRedirect(reverse('login'))
 
@@ -337,9 +378,12 @@ class ModifyPBI(generic.View):
         user = request.user
         if user.is_authenticated:
             pbi = get_object_or_404(ProductBacklogItem, pk=pk)
-            context = {'form': NewPBIForm(initial={'pbi': pbi}),
-            'pbi': pbi}
-            return render(request, 'backtrackapp/modifyPBI.html', context)
+            if has_access(user, pbi.project):
+                context = {'form': NewPBIForm(initial={'pbi': pbi}),
+                'pbi': pbi}
+                return render(request, 'backtrackapp/modifyPBI.html', context)
+            else:
+                return Http404("You do not have access to this project.")
         else:
             return HttpResponseRedirect(reverse('login'))
 
@@ -347,8 +391,6 @@ class ModifyPBI(generic.View):
         if 'savePBI' in self.request.POST:
             return self.savePBI(request, pk)
         else:
-            #this is a stub method and needs to be changed
-            print(form.errors)
             return HttpResponse("Did not work.")
 
     def savePBI(self, request, pk):
