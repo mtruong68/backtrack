@@ -1,11 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 import datetime
-
-class User(models.Model):
-    name = models.CharField(max_length=256)
-    def __str__(self):
-        return self.name
-    #available = models.BooleanField()
 
 class Project(models.Model):
     name = models.CharField(max_length=256)
@@ -13,13 +8,29 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+class User(AbstractUser):
+    name = models.CharField(max_length=256)
+    current_project = models.ForeignKey(Project,
+    on_delete=models.SET_NULL, null=True)
+    def __str__(self):
+        return self.name
+
+class ProjectTeam(models.Model):
+    scrum_master = models.ForeignKey(User, on_delete=models.SET_NULL,
+    null=True, related_name='scrum_master')
+    product_owner = models.ForeignKey(User, on_delete=models.SET_NULL,
+    null=True, related_name='product_owner')
+    dev_team = models.ManyToManyField(User, related_name='devs')
+    project = models.ForeignKey(Project,
+    on_delete = models.CASCADE)
+
 class Sprint(models.Model):
     number = models.PositiveIntegerField()
     start_date = models.DateTimeField(auto_now_add=True)
     project = models.ForeignKey(Project,
     on_delete = models.CASCADE)
     def __str__(self):
-        return str(self.number)        
+        return str(self.number)
 
 class ProductBacklogItem(models.Model):
     STATUS = (

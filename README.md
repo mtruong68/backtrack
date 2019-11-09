@@ -2,10 +2,20 @@
 Built with Python v 3.5.2 and Django 2.2.6
 
 ## current todo
-* allow refinement of pbis/task on the interface
 * add sprint timing functionality, figure out what to do if a project has no sprints yet
-* create some sort of data structure to hold users for each project
-* user permissions/different roles within a project
+* change task view so that it looks good
+
+* create index views for users (devs and product owners)
+* prevent users from seeing product/sprint backlogs that they were not assigned to
+* prevent users who are not product owners from adding pbi
+
+* clean up the code!!! clean up task/pbi form
+* figure out the many-to-many manager thing
+
+* incorporate sprint things to project form
+* allow deletion of project
+* allow modification of project (can add or delete users on dev team/scrum master)
+
 * ***WRITE TESTS***
 * deploy server to heroku or some other host
 * please someone... do some css magic on it... its so ugly rn
@@ -16,14 +26,28 @@ To run locally on your machine:
 Note: Backtrack is the project name, backtrackapp is the app name (confusing, I know. sorry)
 
 *Links to use Backtrack:*
-localhost:8000/backtrack/
-localhost:8000/backtrack/<project_id>/productbacklog
+localhost:8000/
+(will lead to the login page)
 *On using the Django shell*
 ```
 $ python manage.py shell
-> import backtrackapp.models import $MODELS
+> from backtrackapp.models import $MODELS
+> p = Project(name="test", desc="a test project")
+> p.save()
 ```
 And then you can add/delete/query the db.
+And if you want to create new users in the shell:
+(Do not create w regular user object as that cannot create correct passwords)
+```
+> User.objects.create_user(**data)
+```
+To the test the interface, you can load in some data in the console:
+Currently in initial data, the usernames are the team members and the passwords are all password
+And to save the state of a database, you can dump data as well
+```
+$ python manage.py dumpdata backtrackapp>backtrackapp/fixtures/$FILENAME
+$ python manage.py loaddata initialdata.json
+```
 
 Every time you make changes to the models.py for the backtrackapp (does not apply to inserting/deleting items in the database using forms/shell)
 ```
@@ -38,6 +62,7 @@ find . -path "*/migrations/*.pyc"  -delete
 rm db.sqlite3
 ```
 or run `./dropdb.sh`
+
 
 If you create a new file you must restart the server
 (Does not hold true for modifying files)

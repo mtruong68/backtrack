@@ -80,29 +80,35 @@
                   <h4>STORY POINT</h4>
                 </td>
                 <td class="itemPBI">
+                  <h4>CUMULATIVE STORY POINTS</h4>
+                </td>
+                <td class="itemPBI">
                   <h4>STATUS</h4>
                 </td>
                 <td class="itemPBI">
                   <h4>FUNCTION BUTTON</h4>
                 </td>
               </tr>
-              {% for pbi in project.productbacklogitem_set.all %}
+              {% for el in pbi_cum_points_list %}
               <tr>
                 <td class="itemPBI">
-                  <b><a href="{% url 'backtrack:modifyPBI' pbi.id %}">{{pbi.name}}</a></b>
-                  <input type="hidden" name="pbi" value="{{pbi.id}}" />
+                  <b><a href="{% url 'backtrack:modifyPBI' el.pbi.id %}">{{el.pbi.name}}</a></b>
+                  <input type="hidden" name="pbi" value="{{el.pbi.id}}" />
                 </td>
                 <td class="itemPBI">
-                  {{pbi.desc}}
+                  {{el.pbi.desc}}
                 </td>
                 <td class="itemPBI">
-                  {{pbi.priority}}
+                  {{el.pbi.priority}}
                 </td>
                 <td class="itemPBI">
-                  {{pbi.storypoints}}
+                  {{el.pbi.storypoints}}
                 </td>
                 <td class="itemPBI">
-                  {{pbi.status}}
+                  {{el.cum_points}}
+                </td>
+                <td class="itemPBI">
+                  {{el.pbi.status}}
                 </td>
                 <td class="itemPBI">
                   <input type="submit" value="Add to Sprint" name="addToSprint"/><br>
@@ -127,7 +133,7 @@
             <input type="submit" value="Create New PBI" name="createNewPBI"/>
           </form>
         </div>
-        
+
         </td>
 
       </tr>
