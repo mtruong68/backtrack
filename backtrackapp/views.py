@@ -143,7 +143,10 @@ class ProjectPBView(generic.CreateView):
 class SprintBacklogView(generic.DetailView):
     def get(self, request, pk):
         sprint = get_object_or_404(Sprint, pk=pk)
-        return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint})
+        pbi_set = project.productbacklogitem_set.all().order_by('priority')
+        sprint = get_object_or_404(Sprint, pk=pk)
+        context = {'project': project, 'sprint': sprint, 'pbi_set':pbi_set}
+        return render(request, 'backtrackapp/projectsbview.html', context)
 
 
 class NewTaskView(generic.CreateView):
