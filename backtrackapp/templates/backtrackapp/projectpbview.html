@@ -1,48 +1,9 @@
+{% load static %}
+
 <head>
   <title>Product Backlog</title>
+  <link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\pbStyle.css' %}">
 </head>
-
-<style>
-  input {
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-  }
-
-  td .itemPBI {
-    border: 3px solid black;
-    padding: 5px;
-    height: auto;
-  }
-
-  body {
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-    padding: 10px;
-  }
-
-  div#user {
-    display: inline-block;
-    text-align: center;
-    float: right;
-  }
-
-  table#mainFrame {
-    width: 100%;
-  }
-
-  div#title {
-    display: inline-block;
-  }
-
-  div#createNewPBI {
-    border: 2px solid black;
-    padding: 10px;
-  }
-
-  div#entriesPBI {
-    height: 450px;
-    overflow-y: scroll;
-    align-items: center;
-  }
-</style>
 
 <body>
 
@@ -134,11 +95,11 @@
           </form>
         </div>
 
-        </td>
+      </td>
 
-      </tr>
-    </table>
+    </tr>
+  </table>
 
-    <div><h3>Total story point: <input type="text" disabled="true" size="10"></h3></div>
+  <div><h3>Total story point: <input type="text" disabled="true" size="10"></h3></div>
 
-  </body>
+</body>
