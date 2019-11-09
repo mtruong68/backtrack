@@ -254,6 +254,19 @@ class ProjectPBView(generic.View):
                 pbi.priority = pbi.priority - 1
                 pbi.save()
 
+    def splitPBI(self, request, pk):
+        proj = get_object_or_404(Project, pk=pk)
+        num = request.POST.get('numOfChildPBI')
+        pbi_id = request.POST.get('pbi')
+        pbi = ProductBacklogItem.objects.get(pk=pbi_id)
+        i = 1
+        while (i <= int(num)):
+            ProductBacklogItem.objects.create(name = pbi.name + "." + str(i), desc = pbi.desc, priority = pbi.priority, storypoints = pbi.storypoints, status = pbi.status, project = proj)
+            i = i + 1
+        ProductBacklogItem.objects.get(pk=pbi_id).delete()
+        #redirect back to product backlog view
+        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+        
 #Views handling the client accessing the Sprint Backlog
 class SprintBacklogView(generic.View):
     def get(self, request, pk):
