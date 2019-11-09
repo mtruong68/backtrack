@@ -1,25 +1,138 @@
+<head>
+  <title>Product Backlog</title>
+</head>
 
-<h3><a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}}</a> Product Backlog</h3>
-<h4><a href="{% url 'backtrack:project_sb' latestSprint %}">Sprint Backlog</a></h4>
+<style>
+  input {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+  }
 
+  td .itemPBI {
+    border: 3px solid black;
+    padding: 5px;
+    height: auto;
+  }
 
-{% for pbi in pbi_set %}
-  <div>
-      <form method="POST">{% csrf_token %}
-        <p><b>{{pbi.name}}</b>: {{pbi.desc}},
-          Priority: {{pbi.priority}}, Status:{{pbi.status}},
-          Story Points: {{pbi.storypoints}}</p>
-        <input type="hidden" name="pbi" value="{{pbi.id}}" />
-        <input type="submit" value="Add to Sprint" name="addToSprint"/>
-        <input type="submit" value="Delete PBI" name="deletePBI"/>
-        <input type="submit" value="Modify PBI" name="modifyPBI"/>
-      </form>
+  body {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    padding: 10px;
+  }
+
+  div#user {
+    display: inline-block;
+    text-align: center;
+    float: right;
+  }
+
+  table#mainFrame {
+    width: 100%;
+  }
+
+  div#title {
+    display: inline-block;
+  }
+
+  div#createNewPBI {
+    border: 2px solid black;
+    padding: 10px;
+  }
+
+  div#entriesPBI {
+    height: 450px;
+    overflow-y: scroll;
+    align-items: center;
+  }
+</style>
+
+<body>
+
+  <div id="heading">
+    <div id="title"><h1>BackTrack</h1></div>
+    <div id="user"><h3>(USERNAME)<br>Product Owner</h3></div>
+    <div id="subTitle"><h3>View my <a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}}</a> Product Backlog</h3></div>
   </div>
-{% endfor %}
 
-<form method="POST">
-  {% csrf_token %}
-  <h3>Create New PBI</h3>
-  {{form.as_p}}
-  <input type="submit" value="Create New PBI" name="createNewPBI"/>
-</form>
+  <div id="sprintBacklog">
+    {% if latestSprint %}
+    <h3><a href="{% url 'backtrack:project_sb' latestSprint %}">Sprint backlog</a></h3>
+    {% endif %}
+  </div>
+
+  <table id="mainFrame">
+    <tr>
+
+      <td>
+        <div id="entriesPBI">
+
+          <form method="POST">{% csrf_token %}
+            <table id="PBI">
+              <tr id="header">
+                <td class="itemPBI">
+                  <h4>NAME</h4>
+                </td>
+                <td class="itemPBI">
+                  <h4>DESCRIPTION</h4>
+                </td>
+                <td class="itemPBI">
+                  <h4>PRIORITY</h4>
+                </td>
+                <td class="itemPBI">
+                  <h4>STORY POINT</h4>
+                </td>
+                <td class="itemPBI">
+                  <h4>STATUS</h4>
+                </td>
+                <td class="itemPBI">
+                  <h4>FUNCTION BUTTON</h4>
+                </td>
+              </tr>
+              {% for pbi in project.productbacklogitem_set.all %}
+              <tr>
+                <td class="itemPBI">
+                  <b><a href="{% url 'backtrack:modifyPBI' pbi.id %}">{{pbi.name}}</a></b>
+                  <input type="hidden" name="pbi" value="{{pbi.id}}" />
+                </td>
+                <td class="itemPBI">
+                  {{pbi.desc}}
+                </td>
+                <td class="itemPBI">
+                  {{pbi.priority}}
+                </td>
+                <td class="itemPBI">
+                  {{pbi.storypoints}}
+                </td>
+                <td class="itemPBI">
+                  {{pbi.status}}
+                </td>
+                <td class="itemPBI">
+                  <input type="submit" value="Add to Sprint" name="addToSprint"/><br>
+                  <input type="submit" value="Delete PBI" name="deletePBI"/><br>
+                  <input type="text" placeholder="Number of Child PBI" name="numOfChildPBI"><br>
+                  <input type="submit" value="Split PBI" name="splitPBI"/>
+                </td>
+              </tr>
+              {% endfor %}
+            </table>
+          </form>
+
+        </div>
+      </td>
+
+      <td>
+        <div id="createNewPBI">
+          <form method="POST">
+            {% csrf_token %}
+            <h3>Create New PBI</h3>
+            {{form.as_p}}
+            <input type="submit" value="Create New PBI" name="createNewPBI"/>
+          </form>
+        </div>
+        
+        </td>
+
+      </tr>
+    </table>
+
+    <div><h3>Total story point: <input type="text" disabled="true" size="10"></h3></div>
+
+  </body>

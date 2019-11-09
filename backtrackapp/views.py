@@ -37,7 +37,6 @@ class NewProjectView(generic.CreateView):
         if form.is_valid():
             newProject = form.save()
             newProject.save()
-            Sprint.create
             return HttpResponseRedirect(reverse('backtrack:index'))
 
         return render(request,
@@ -65,6 +64,8 @@ class ProjectPBView(generic.CreateView):
             return self.createNewPBI(request, pk)
         if 'deletePBI' in self.request.POST:
             return self.deletePBI(request, pk)
+        if 'splitPBI' in self.request.POST:
+            return self.splitPBI(request, pk)
         if 'modifyPBI' in self.request.POST:
             pbi_id = request.POST.get('pbi')
             return HttpResponseRedirect(reverse('backtrack:modifyPBI', args=(pbi_id,)))
@@ -107,6 +108,19 @@ class ProjectPBView(generic.CreateView):
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
+
+    def splitPBI(self, request, pk):
+        proj = get_object_or_404(Project, pk=pk)
+        num = request.POST.get('numOfChildPBI')
+        pbi_id = request.POST.get('pbi')
+        pbi = ProductBacklogItem.objects.get(pk=pbi_id)
+        i = 1
+        while (i <= int(num)):
+            ProductBacklogItem.objects.create(name = pbi.name + "." + str(i), desc = pbi.desc, priority = pbi.priority, storypoints = pbi.storypoints, status = pbi.status, project = proj)
+            i = i + 1
+        ProductBacklogItem.objects.get(pk=pbi_id).delete()
+        #redirect back to product backlog view
+        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
 
     def checkPriority(self, pk, pri):
         proj = get_object_or_404(Project, pk=pk)
@@ -243,6 +257,10 @@ class ModifyTaskView(generic.CreateView):
                 task.save()
         return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))
 
+
+
+#Views handling the client accessing the Product Backlog
+#Maybe make separate view for just looking at the product backlog
 class modifyPBI(generic.CreateView):
     #need to sort pbi by priority and show in order of priority
     def get(self, request, pk):
