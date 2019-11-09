@@ -1,243 +1,75 @@
+{% load static %}
+
 <head>
   <title>Sprint Backlog</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'backtrackapp/sbStyle.css' %}">
 </head>
-
-<style>
-  input {
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-  }
-
-  .itemSprint {
-    border: 2px solid black;
-    padding: 5px;
-    height: 40px;
-    width: auto;
-  }
-
-  body {
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-    padding: 10px;
-  }
-
-  div#user {
-    display: inline-block;
-    text-align: center;
-    float: right;
-  }
-
-  table#mainFrame {
-    width: 100%;
-  }
-
-  div#title {
-    display: inline-block;
-  }
-
-  div#createNewPBI {
-    border: 2px solid black;
-    padding: 10px;
-  }
-
-  div#pastSprint {
-    height: 45px;
-    overflow-x: scroll;
-    display: inline-block;
-    width: 200px;
-  }
-
-  .catPBI {
-    border: 3px solid black;
-    padding: 5px;
-    height: auto;
-  }
-
-  td {
-    width:50%;
-    padding-right: 10px;
-  }
-
-  .catTask {
-    border: 3px solid black;
-    height: auto;
-    display: inline-block;
-    text-align: center;
-  }
-
-  .task {
-    border: 3px solid black;
-    padding: 5px;
-    height: auto;
-  }
-
-  table#count {
-    border: 2px solid black;
-    padding: 10px;
-    float: right;
-    width: 40%;
-  }
-
-</style>
 
 <body>
 
   <div id="heading">
     <div id="title"><h1>BackTrack</h1></div>
     <div id="user"><h3>(USERNAME)<br>Product Owner</h3></div>
+    <div class="subTitle"><a href="{% url 'backtrack:project_pb' project.id %}"><h3>Back to "{{project.name}}" Page</h3></a></div>
+    <div class="subTitle"><a href="{% url 'backtrack:project_pb' sprint.project.id %}"><h3>Back to Product Backlog</h3></a></div>
+  </div>
 
-    <table id="mainFrame">
-      <tr>
-        <td>
-          <div id="subTitle"><h3>View my <a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}}</a> Product Backlog</h3></div>
-        </td>
-        <td>
-          <div id="pastSprint">
-            <span class="itemSprint">Sprint 1</span>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <div id="productBacklog">
-            <h5>Product Backlog</h5>
-            <div class="catPBI">
-              <h5>PBIs for Current Sprint</h5>
-            </div>
-            <div class="catPBI">
-              <h5>Unscheduled PBIs</h5>
-            </div>
-            <div class="catPBI">
-              <h5>Completed PBIs</h5>
-            </div>
-          </div>
-        </td>
-        <td>
-          <div id="sprintBacklog">
-            <h5>Tasks for Current Sprint</h5>
-          </div>
+  <h3>View my Sprint</h3>
+
+  <table id="mainFrame">
+    <tr>
+
+      <td>
+        <div id="productBacklog">
+          <h5>Product Backlog</h5>
           <table>
-            <tr>
-              <td>
-                <div class="catTask">
-                  <h5> Not Started </h5>
-                  <div class="task">
-                    <h5>Task X</h5>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div class="catTask">
-                  <h5> In Progress </h5>
-                  <div class="task">
-                    <h5>Task X</h5>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div class="catTask">
-                  <h5> Complete </h5>
-                  <div class="task">
-                    <h5>Task X</h5>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div class="catTask">
-                  <h5> Estimated Effort </h5>
-                  <div class="task">
-                    <h5>Task X</h5>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div class="catTask">
-                  <h5> Burndown </h5>
-                  <div class="task">
-                    <h5>Task X</h5>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div class="catTask">
-                  <h5> Remaining Effort </h5>
-                  <div class="task">
-                    <h5>Task X</h5>
-                  </div>
-                </div>
-              </td>
-            </tr>
+            <tr><th><h5>PBIs for Current Sprint</h5></th></tr>
+            {% for pbi in sprint.productbacklogitem_set.all %}
+            <tr><td class="PBI"><b><a href="{% url 'backtrack:new_task' pbi.id %}">{{pbi.name}}</a></b>: {{pbi.desc}}</td></tr>
+            {% endfor %}
           </table>
-        </td>
-      </tr>
-    </table>
-
-    <table id="count">
-      <tr>
-        <td>
-          Total Estimated Effort
-        </td>
-        <td>
-          Total Burndown
-        </td>
-        <td>
-          Total Remaining Effort
-        </td>
-      </tr>
-      <tr>
-        <td>
-        </td>
-        <td>
-        </td>
-        <td>
-        </td>
-      </tr>
-    </table>
-
-    {% if sprint %}
-    <p>Sprint History</p>
-    <p>Number of sprint: {{project.sprint_set.count}}</p>
-
-    {{% if sprint.project.sprint_set.count > 0 %}
-
-    {{% for sprint in project.sprint_set.all %}
-
-    {{% if sprint == project.trylatestSprint %}
-    <b>(current)</b>
-    {% endif %}}
-
-    Sprint {{sprint}}
-    <p>Start Day: {{sprint.start_date}} End Day: {{sprint.end_date}}</p>
-
-    {{% if remaining %}
-    <p>Remained hours: {{remaining}}</p>
-    {% endif %}}
-
-    {% endfor %}}
-
-    {% else %}
-
-    No previous sprint yet
-
-    {% endif %}}
-
-    <p>*default duration is 14 days</p>
-    <h3>Sprint {{sprint.number}}</h3>
-    <ul>
-
-      {{% for pbi in sprint.productbacklogitem_set.all %}
-      <div>
-        <p><a href="{% url 'backtrack:new_task' pbi.id %}">
-          <b>{{pbi.name}}</b></a>: {{pbi.desc}}</p>
         </div>
-        {% endfor %}}
+      </td>
 
-        <ul>
+      <td>
 
+        <div id="sprintBacklog">
+          {% if sprint %}
+          <div id="pastSprints">
+            Sprint History<br>
+            Number of sprint: {{project.sprint_set.count}}<br>
+            {% if sprint.project.sprint_set.count > 0 %}
+            {% for sprint in project.sprint_set.all %}
+            <div class="sprint">
+              {% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
+              Sprint {{sprint}}<br>
+              Start Day: {{sprint.start_date}}<br>
+              End Day: {{sprint.end_date}}<br>
+              {% if remaining %}Remained hours: {{remaining}}{% endif %}
+            </div>
+            {% endfor %}
+            {% else %}
+            No previous sprint yet
+            {% endif %}
+          </div>
+
+          <div id="taskEntries">
+            <h3>Sprint {{sprint.number}}</h3>
+            *default duration is 14 days<br>
+            <h5>Tasks for Current Sprint</h5>
+            <table id="taskTable">
+              <tr><th><h5>Not Started</h5></th><th><h5>In Progress</h5></th><th><h5>Complete</h5></th><th><h5>Estimated Effort</h5></th><th><h5>Burndown</h5></th><th><h5>Remaining Effort</h5></th></tr>
+              <tr><td colspan="3" style="text-align: right"><h5>Total</h5></td><td></td><td></td><td></td></tr>
+            </table>
+          </div>
           {% else %}
-
-          <h2> No Product Backlog Items in Sprint yet </h2>
-
+          <h2>No Product Backlog Items in Sprint yet</h2>
           {% endif %}
+        </div>
 
-          <a href= "{% url 'backtrack:project_pb' sprint.project.id %}"> Back to Product Backlog</a>
+      </td>
 
-        </body>
+    </tr>
+  </table>
+
+</body>
