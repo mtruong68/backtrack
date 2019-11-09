@@ -1,16 +1,18 @@
 {% if sprint %}
-  <h3>Sprint {{sprint.number}}</h3>
-  <ul>
-    {% for pbi in sprint.productbacklogitem_set.all %}
-    <div>
-      <p><a href="{% url 'backtrack:new_task' pbi.id %}">
-        "<b>{{pbi.name}}</b></a>
-        : {{pbi.desc}}</p>
-    </div>
-    {% endfor %}
-  <ul>
-{% else %}
-  <h2> No Product Backlog Items in Sprint yet </h2>
+  {% if sprint.productbacklogitem_set.all %}
+    <h3>Sprint {{sprint.number}}</h3>
+    <ul>
+      {% for pbi in sprint.productbacklogitem_set.all %}
+      <div>
+        <p><a href="{% url 'backtrack:new_task' pbi.id %}">
+          "<b>{{pbi.name}}</b></a>
+          : {{pbi.desc}}</p>
+      </div>
+      {% endfor %}
+    <ul>
+  {% else %}
+    <h2> No Product Backlog Items in Sprint yet </h2>
+  {% endif %}
 {% endif %}
 
 <a href= "{% url 'backtrack:project_pb' sprint.project.id %}"> Back to Product Backlog</a>
