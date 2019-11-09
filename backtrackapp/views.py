@@ -142,7 +142,7 @@ class ProjectPBView(generic.CreateView):
 #Views handling the client accessing the Sprint Backlog
 class SprintBacklogView(generic.DetailView):
     def get(self, request, pk):
-        sprint = get_object_or_404(Sprint, pk=pk)
+        project = get_object_or_404(Project, pk=pk)
         pbi_set = project.productbacklogitem_set.all().order_by('priority')
         sprint = get_object_or_404(Sprint, pk=pk)
         context = {'project': project, 'sprint': sprint, 'pbi_set':pbi_set}
