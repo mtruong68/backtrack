@@ -19,3 +19,6 @@ def start():
 
 def add_job(date):
     scheduler.add_job(backtrackscheduler.test_schedule, 'date', run_date=date)
+
+def schedule_end_sprint_job(date):
+    scheduler.add_job(backtrackscheduler.end_sprint_events, 'date', run_date=date)

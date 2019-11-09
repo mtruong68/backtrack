@@ -120,6 +120,7 @@ class NewProjectView(generic.View):
             newSprint.number = 1
             newSprint.project = newProject
             newSprint.start_date = sprint_start
+            Sprint.newSprint()
             newSprint.save()
 
             newTeam = teamForm.save(commit=False)

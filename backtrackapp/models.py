@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import datetime
 
+from projectUpdater import backtrackscheduler, updater
 
 class Project(models.Model):
     name = models.CharField(max_length=256)
@@ -32,6 +33,18 @@ class Sprint(models.Model):
     interval = models.DurationField()
     project = models.ForeignKey(Project,
     on_delete = models.CASCADE)
+
+    #did not yet test this method dont use until testing
+    def getLatest(self, proj):
+        return Sprint.filter(project=proj).latest('start_date')
+
+    #Use this every time you want
+    def sprintEndEvents(self, date, duration):
+        if (date + duration < self.project.end_date):
+            updater.schedule_end_sprint_job(date + duration)
+        else:
+            print("cannot schedule")
+
     def __str__(self):
         return str(self.number)
 
