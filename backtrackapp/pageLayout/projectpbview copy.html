@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<head>
+  <title>Home</title>
+  <link href="style.css" rel="stylesheet" type="text/css" media="all">
+</head>
+
+
+<body sytle="">
+  <div class="wrap">
+    <div class="header">
+      <div class="header_top">
+			     <div class="logo">
+				         <a href="index.html"><img src="img/logo.png" alt=""></a>
+			     </div>
+           <h3><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></h3>
+           <br>
+           <h4><a href="{% url 'backtrack:project_sb' latestSprint %}">Sprint Backlog</a></h4>
+      </div>
+ <h3>{{project.name}} Product Backlog</h3>
+ {% for pbi in project.productbacklogitem_set.all %}
+  <div class="header_bottom">
+    <div class="menu">
+      <ul>
+       <form method="POST">{% csrf_token %}
+         <div class="content"><p><b>{{pbi.name}}</b>: {{pbi.desc}}</p>,
+          Priority: {{pbi.priority}}, Status:{{pbi.status}},
+          Story Points: {{pbi.storypoints}}</p></div>
+       </ul>
+       <ul>
+         <li><input type="hidden" name="pbi" value="{{pbi.id}}" /></li>
+         <li><input type="submit" value="Add to Sprint" name="addToSprint"/></li>
+         <li><input type="submit" value="Delete PBI" name="deletePBI"/></li>
+         <li><input type="submit" value="Modify PBI" name="modifyPBI"/></li>
+         <div class="clear"></div>
+        </ul>
+       </form>
+       {% endfor %}
+       {% csrf_token %}
+       <br>
+       <form method="POST">
+
+        <h3>Create New PBI</h3>
+        <div class="content">{{form.as_p}}</div>
+        <ul>
+         <li>
+          <input type="submit" value="Create New PBI" name="createNewPBI"/>
+         </li>
+        </ul>
+       </form>
+     </div>
+    </div>
+  </div>
+   <div class"clear"></div>
+
+
+</body>
