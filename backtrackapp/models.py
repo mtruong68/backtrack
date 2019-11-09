@@ -2,9 +2,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import datetime
 
+
 class Project(models.Model):
     name = models.CharField(max_length=256)
     desc = models.TextField()
+    end_date = models.DateTimeField()
     def __str__(self):
         return self.name
 
@@ -26,7 +28,8 @@ class ProjectTeam(models.Model):
 
 class Sprint(models.Model):
     number = models.PositiveIntegerField()
-    start_date = models.DateTimeField(auto_now_add=True)
+    start_date = models.DateTimeField()
+    interval = models.DurationField()
     project = models.ForeignKey(Project,
     on_delete = models.CASCADE)
     def __str__(self):

@@ -1,6 +1,6 @@
 # Backtrack application for Scrum Management
 Built with Python v 3.5.2 and Django 2.2.6
-
+Dependencies: install django-durationfield with `pip install django-durationwidget`
 ## current todo
 * add sprint timing functionality, figure out what to do if a project has no sprints yet
 * change task view so that it looks good
@@ -13,6 +13,8 @@ Built with Python v 3.5.2 and Django 2.2.6
 * figure out the many-to-many manager thing
 
 * incorporate sprint things to project form
+* allow date time picker to be a widget easily incorporated into forms
+
 * allow deletion of project
 * allow modification of project (can add or delete users on dev team/scrum master)
 

@@ -1,25 +1,45 @@
-{% if user.current_project %}
-  <h3><a href="{% url 'backtrack:project_pb' current_project.id %}">{{current_project.name}}</a></h3>
-{% endif %}
+<head>
+<!-- jQuery -->
+ <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 
-  {% if projects %}
-    <ul>
-      {% for project in projects %}
-      <div>
-        <h3><a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}}</a></h3>
-        <p>{{project.desc}}</p>
-      </div>
-      {% endfor %}
-    <ul>
-  {% else %}
-    <h2> No projects currently </h2>
+ <!-- XDSoft DateTimePicker -->
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css" integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  {% if user.current_project %}
+    <h3><a href="{% url 'backtrack:project_pb' current_project.id %}">{{current_project.name}}</a></h3>
   {% endif %}
 
-  <h2> Create new project </h2>
-  <form method="POST">
-    {% csrf_token %}
-    {{projectForm.as_p}}
-    <p>Product Owner: {{user.name}}</p>
-    {{teamForm.as_p}}
-  <input type="submit" value="Create Project">
-  </form>
+    {% if projects %}
+      <ul>
+        {% for project in projects %}
+        <div>
+          <h3><a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}}</a></h3>
+          <p>{{project.desc}}</p>
+        </div>
+        {% endfor %}
+      <ul>
+    {% else %}
+      <h2> No projects currently </h2>
+    {% endif %}
+
+    <h2> Create new project </h2>
+    <form method="POST">
+      {% csrf_token %}
+      {{projectForm.as_p}}
+      <p>Project End Date: <input class="datetimepicker" type="text" name='proj-end-date'> </p>
+      <p>Product Owner: {{user.name}}</p>
+      {{teamForm.as_p}}
+      {{sprintForm.as_p}}
+      <p>First Sprint Start Date: <input class="datetimepicker" type="text" name='first-sprint-start-date'></p>
+    <input type="submit" value="Create Project">
+    </form>
+
+     <script>
+       $(function () {
+         $(".datetimepicker").datetimepicker();
+       });
+     </script>
+</body>

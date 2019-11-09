@@ -1,7 +1,8 @@
 from django import forms
-from .models import Project, ProductBacklogItem, Task, User, ProjectTeam
+from .models import Project, ProductBacklogItem, Task, User, ProjectTeam, Sprint
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from durationwidget.widgets import TimeDurationWidget
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -18,9 +19,17 @@ class NewProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         prefix = "projectForm"
-        fields = '__all__'
+        exclude = ['end_date']
         labels = {
         "desc": "Description"
+        }
+
+class NewSprintForm(forms.ModelForm):
+    class Meta:
+        model = Sprint
+        fields = ['interval', ]
+        widgets = {
+            'interval': TimeDurationWidget(),
         }
 
 class NewPBIForm(forms.ModelForm):
@@ -40,3 +49,6 @@ class NewTaskForm(forms.ModelForm):
         "desc": "Description",
         "assignment": "Assigned To"
         }
+
+class DateForm(forms.Form):
+    date = forms.DateTimeField(input_formats=['%d/%m/%Y %H:%M'])

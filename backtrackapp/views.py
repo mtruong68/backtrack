@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 
-from .forms import NewProjectForm, NewPBIForm, NewTaskForm, ProjectTeamForm, CustomUserCreationForm
+from .forms import NewProjectForm, NewPBIForm, NewTaskForm, ProjectTeamForm, NewSprintForm, CustomUserCreationForm
 from .models import Project, ProductBacklogItem, Sprint, User, ProjectTeam, Task
 
 from projectUpdater import backtrackscheduler, updater
@@ -86,12 +86,14 @@ class NewProjectView(generic.View):
                 projects = Project.objects.all()
                 projectForm = NewProjectForm()
                 teamForm = ProjectTeamForm()
+                sprintForm = NewSprintForm()
+
                 teamForm.fields['scrum_master'].queryset = User.objects.filter(current_project=None).exclude(pk=user.pk)
                 teamForm.fields['dev_team'].queryset = User.objects.filter(current_project=None).exclude(pk=user.pk)
 
                 return render(request,
                 'backtrackapp/newproject.html',
-                {'projectForm': projectForm, 'teamForm': teamForm, 'projects': projects})
+                {'projectForm': projectForm, 'teamForm': teamForm, 'sprintForm':sprintForm, 'projects': projects})
         else:
             return HttpResponseRedirect(reverse('login'))
 
@@ -99,24 +101,48 @@ class NewProjectView(generic.View):
         user = request.user
         projectForm = NewProjectForm(request.POST)
         teamForm = ProjectTeamForm(request.POST)
+        sprintForm = NewSprintForm(request.POST)
+
+        proj_end = request.POST.get('proj-end-date')
+        proj_end = self.cleantime(proj_end)
+        sprint_start = request.POST.get('first-sprint-start-date')
+        sprint_start = self.cleantime(sprint_start)
 
         if self.checkMembers(request, user) == False:
             return HttpResponse("Form is incorrect")
 
-        if teamForm.is_valid() and projectForm.is_valid():
-            newProject = projectForm.save()
+        if teamForm.is_valid() and projectForm.is_valid() and sprintForm.is_valid():
+            newProject = projectForm.save(commit=False)
+            newProject.end_date = proj_end
             newProject.save()
+
+            newSprint = sprintForm.save(commit=False)
+            newSprint.number = 1
+            newSprint.project = newProject
+            newSprint.start_date = sprint_start
+            newSprint.save()
+
             newTeam = teamForm.save(commit=False)
             newTeam.project = newProject
             newTeam.product_owner = user
             newTeam.save()
             self.update_dev_team(request, newTeam)
             self.update_team_current_project(newTeam)
+
             return HttpResponseRedirect(reverse('backtrack:project_pb', args=(newProject.id,)))
 
         return render(request,
         'backtrackapp/newproject.html',
         {'projectForm': projectForm, 'teamForm': teamForm})
+
+    def cleantime(self, date):
+        year = int(date[:4])
+        month = int(date[5:7])
+        day = int(date[8:10])
+        hour = int(date[11:13])
+        minute = int(date[14:16])
+        print([year, month, day, hour, minute])
+        return datetime.datetime(year, month, day, hour, minute)
 
     #Will return true if there are no duplicates selected project team and all
     #selected members are currently available (current_project = false)
@@ -148,7 +174,6 @@ class NewProjectView(generic.View):
         newTeam.scrum_master.current_project = project
         newTeam.scrum_master.save()
         for dev in newTeam.dev_team.all():
-            print(dev.name)
             dev.current_project = project
             dev.save()
 
@@ -202,7 +227,6 @@ class ProjectPBView(generic.View):
             return HttpResponseRedirect(reverse('backtrack:modifyPBI', args=(pbi_id,)))
         else:
             #this is a stub method and needs to be changed
-            print(form.errors)
             return HttpResponse("Did not work.")
 
     def addToSprint(self, request, pk):
@@ -237,7 +261,6 @@ class ProjectPBView(generic.View):
                 return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
         else:
             #this is a stub method and needs to be changed
-            print(form.errors)
             return HttpResponse("Did not work.")
 
     def checkPriority(self, pk, pri):
@@ -308,7 +331,6 @@ class NewTaskView(generic.View):
             return self.addTask(request, pk)
         else:
             #this is a stub method and needs to be changed
-            print(form.errors)
             return HttpResponse("Did not work.")
 
     def deleteTask(self, request, pk):
@@ -321,7 +343,6 @@ class NewTaskView(generic.View):
         return HttpResponseRedirect(reverse('backtrack:modify_task', args=(task_id,)))
 
     def addTask(self, request, pk):
-        print(request.POST)
         pbi = get_object_or_404(ProductBacklogItem, pk=pk)
         form = NewTaskForm(request.POST, initial={"pbi":pbi})
         if form.is_valid():
@@ -335,7 +356,6 @@ class NewTaskView(generic.View):
             return HttpResponseRedirect(reverse('backtrack:new_task', args=(pk,)))
         else:
             #this is a stub method and needs to be changed
-            print(form.errors)
             return HttpResponse("Did not work.")
 
 class ModifyTaskView(generic.View):
@@ -451,7 +471,6 @@ class ModifyPBI(generic.View):
             return
 
         pbis = pbi.project.productbacklogitem_set.all()
-        print(pbis)
         if old_priority < new_priority:
             for i in pbis:
                 if i.priority <= new_priority and i.priority > old_priority:
