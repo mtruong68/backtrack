@@ -289,7 +289,8 @@ class SprintBacklogView(generic.View):
         if user.is_authenticated:
             sprint = get_object_or_404(Sprint, pk=pk)
             if has_access(user, sprint.project.pk):
-                return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint})
+                return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint,
+                'project': sprint.project})
             else:
                 return Http404("You do not have access to this project")
         else:
