@@ -407,7 +407,7 @@ class ModifyPBI(generic.View):
         user = request.user
         if user.is_authenticated:
             pbi = get_object_or_404(ProductBacklogItem, pk=pk)
-            if has_access(user, pbi.project):
+            if has_access(user, pbi.project_id):
                 context = {'form': NewPBIForm(initial={'pbi': pbi}),
                 'pbi': pbi}
                 return render(request, 'backtrackapp/modifyPBI.html', context)
