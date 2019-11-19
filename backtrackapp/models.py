@@ -2,27 +2,44 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import datetime
 
+
+
+
+
 class Project(models.Model):
     name = models.CharField(max_length=256)
     desc = models.TextField()
     def __str__(self):
         return self.name
 
+
+
+
+
 class User(AbstractUser):
+    JOB = (
+        ('D', 'Developer'),
+        ('M', 'Manager'),
+    )
     name = models.CharField(max_length=256)
-    current_project = models.ForeignKey(Project,
-    on_delete=models.SET_NULL, null=True)
+    role = models.CharField(max_length=1, choices=JOB, default='D')
+    current_project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
     def __str__(self):
         return self.name
 
+
+
+
+
 class ProjectTeam(models.Model):
-    scrum_master = models.ForeignKey(User, on_delete=models.SET_NULL,
-    null=True, related_name='scrum_master')
-    product_owner = models.ForeignKey(User, on_delete=models.SET_NULL,
-    null=True, related_name='product_owner')
+    scrum_master = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='scrum_master')
+    product_owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_owner')
     dev_team = models.ManyToManyField(User, related_name='devs')
-    project = models.ForeignKey(Project,
-    on_delete = models.CASCADE)
+    project = models.ForeignKey(Project, on_delete = models.CASCADE)
+
+
+
+
 
 class Sprint(models.Model):
     number = models.PositiveIntegerField()
@@ -31,6 +48,10 @@ class Sprint(models.Model):
     on_delete = models.CASCADE)
     def __str__(self):
         return str(self.number)
+
+
+
+
 
 class ProductBacklogItem(models.Model):
     STATUS = (
@@ -49,6 +70,10 @@ class ProductBacklogItem(models.Model):
 
     def __str__(self):
         return self.name
+
+
+
+
 
 class Task(models.Model):
     STATUS = (

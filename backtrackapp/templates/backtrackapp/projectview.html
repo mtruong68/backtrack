@@ -1,3 +1,5 @@
+{% load static %}
+
 <head>
 <title>Project Management</title>
 </head>
@@ -82,54 +84,24 @@ float: right;
 <body>
 <div id="heading">
 <div id="title"><h1>BackTrack</h1></div>
-<div id="user"><h3>(USERNAME)<br>Product Owner</h3></div>
+<div id="user"><h3>(USERNAME)<br>Scrum Master</h3></div>
 </div>
 
 <input type="text" placeholder="search the project you want to view">
 <div id="filter">Filter</div>
 
 <!-- Replace by For Loop -->
-<div class="projectBlock">
-<img class="iconPin" src="icon1.jpg">
-<img class="iconBell" src="icon3.jpg">
-<h3>Project X</h3>
-<img class="iconEnlarge" src="icon2.jpg">
-</div>
 
+{% for projTeam in projectTeamsManaged_list %}
 <div class="projectBlock">
-<img class="iconPin" src="icon1.jpg">
-<img class="iconBell" src="icon3.jpg">
-<h3>Project X</h3>
-<img class="iconEnlarge" src="icon2.jpg">
+<img class="iconPin" src="{% static '\backtrackapp\images\icon1.jpg' %}">
+<img class="iconBell" src="{% static '\backtrackapp\images\icon3.jpg' %}">
+<h3>{{projTeam.project}}</h3>
+<h5>Scrum Master: {{projTeam.scrum_master.name}}</h5>
+<h5>Product Owner: {{projTeam.product_owner.name}}</h5>
+<h5>Development Team: {{projTeam.dev_team.name}}</h5>
+<img class="iconEnlarge" src="{% static '\backtrackapp\images\icon2.jpg' %}">
 </div>
-
-<div class="projectBlock">
-<img class="iconPin" src="icon1.jpg">
-<img class="iconBell" src="icon3.jpg">
-<h3>Project X</h3>
-<img class="iconEnlarge" src="icon2.jpg">
-</div>
-
-<div class="projectBlock">
-<img class="iconPin" src="icon1.jpg">
-<img class="iconBell" src="icon3.jpg">
-<h3>Project X</h3>
-<img class="iconEnlarge" src="icon2.jpg">
-</div>
-
-<div class="projectBlock">
-<img class="iconPin" src="icon1.jpg">
-<img class="iconBell" src="icon3.jpg">
-<h3>Project X</h3>
-<img class="iconEnlarge" src="icon2.jpg">
-</div>
-
-<div class="projectBlock">
-<img class="iconPin" src="icon1.jpg">
-<img class="iconBell" src="icon3.jpg">
-<h3>Project X</h3>
-<img class="iconEnlarge" src="icon2.jpg">
-</div>
-
+{% endfor %}
 
 </body>

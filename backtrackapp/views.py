@@ -39,6 +39,13 @@ def is_dev(user, project_pk):
             return True
     return False
 
+#Sees if the user is the scrum master (manager)
+#True if user is scrum master and is their current project
+def is_scrummaster(user):
+    if user.role == 'M':
+        return True
+    return False
+
 class SignUpView(generic.CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
@@ -49,10 +56,53 @@ class SignUpView(generic.CreateView):
 #if a developer, show the task view
 #do the manager stuff later
 class IndexView(generic.View):
+
+    def productOwnerIndexPage(self, request, user, currentProjectID):
+        project = get_object_or_404(Project, pk=currentProjectID)
+
+        #sort pbi by priority and then calculate cumulative point total
+        pbi_cum_points_list = []
+        pbi_set = project.productbacklogitem_set.all().order_by('priority')
+        total_sum = 0
+        for pbi in pbi_set:
+            pbi_cum_points_set = {}
+            pbi_cum_points_set["pbi"] = pbi
+            total_sum += pbi.storypoints
+            pbi_cum_points_set["cum_points"] = total_sum
+            pbi_cum_points_list.append(pbi_cum_points_set)
+
+        #get the latest sprint and show the sprint backlog of that sprint
+        sprints = project.sprint_set.all()
+        if len(sprints) > 0:
+            latestSprint = sprints.latest('start_date')
+        else:
+            latestSprint = None
+
+        context = {'form': NewPBIForm(initial={'project': project}),
+        'project': project, 'latestSprint': latestSprint,
+        'pbi_cum_points_list': pbi_cum_points_list}
+
+        return render(request, 'backtrackapp/projectpbview.html', context)
+
+    def developerIndexPage(self, request, user, currentProjectID):
+        currentProject = get_object_or_404(Project, pk=currentProjectID)
+        sprint = get_object_or_404(Sprint, project=currentProject)
+        return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint, 'project': sprint.project})
+
+    def scrumMasterIndexPage(self, request, user):
+        projectTeamsManaged = ProjectTeam.objects.filter(scrum_master=user).all()
+        return render(request, 'backtrackapp/projectview.html', {'projectTeamsManaged_list':projectTeamsManaged})
+
     def get(self, request):
         user = request.user
         if user.is_authenticated:
-            return HttpResponse("Hi")
+            project = get_object_or_404(Project, pk=user.current_project.pk)
+            if is_productowner(user, project.pk):
+                return self.productOwnerIndexPage(request, user, project.pk)
+            if is_dev(user, project.pk):
+                return self.developerIndexPage(request, user, project.pk)
+            if is_scrummaster(user):
+                return self.scrumMasterIndexPage(request, user)
         else:
             return HttpResponseRedirect(reverse('login'))
 
@@ -296,6 +346,28 @@ class SprintBacklogView(generic.View):
         else:
             return HttpResponseRedirect(reverse('login'))
 
+#Views handling the client accessing the Project Management Page
+class ProjectView(generic.View):
+    def get(self, request, pk):
+        user = request.user
+        if user.is_authenticated:
+
+
+            projectTeamsManaged = get_object_or_404(ProjectTeam, scrum_master=user)
+            projectsInCharge = projectTeamsManaged.project.all()
+            return render(request, 'backtrackapp/projectview.html', projectsInCharge)
+
+
+
+
+            sprint = get_object_or_404(Sprint, pk=pk)
+            if has_access(user, sprint.project.pk):
+                return render(request, 'backtrackapp/projectsbview.html', {'sprint':sprint,
+                'project': sprint.project})
+            else:
+                return Http404("You do not have access to this project")
+        else:
+            return HttpResponseRedirect(reverse('login'))
 
 class NewTaskView(generic.View):
     def get(self, request, pk):
