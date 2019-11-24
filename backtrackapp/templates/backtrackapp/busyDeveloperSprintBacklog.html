@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}scrumMasterViewSprintBacklogPage{% endblock %}
+{% block content %}
+
+<marquee direction="right" height="30" scrollamount="5" behavior="alternate">Welcome, Developer! Here is your current project</marquee>
+
+<div>
+<span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
+<span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>
+</div>
+
+<div class="tabContent">
+<a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
+<div class="contentTitle">Sprint Backlog</div><p>
+
+
+
+
+
+  <h3>View my Sprint</h3>
+
+  <table id="mainFrame">
+    <tr>
+
+      <td>
+        <div id="productBacklog">
+          <h5>Product Backlog</h5>
+          <table>
+            <tr><th><h5>PBIs for Current Sprint</h5></th></tr>
+            {% for pbi in sprint.productbacklogitem_set.all %}
+            <tr><td class="PBI"><b><a href="{% url 'backtrack:new_task' pbi.id %}">{{pbi.name}}</a></b>: {{pbi.desc}}</td></tr>
+            {% endfor %}
+          </table>
+        </div>
+      </td>
+
+      <td>
+
+        <div id="sprintBacklog">
+          {% if sprint %}
+          <div id="pastSprints">
+            Sprint History<br>
+            Number of sprint: {{project.sprint_set.count}}<br>
+            {% if sprint.project.sprint_set.count > 0 %}
+            {% for sprint in project.sprint_set.all %}
+            <div class="sprint">
+              {% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
+              Sprint {{sprint}}<br>
+              Start Day: {{sprint.start_date}}<br>
+              End Day: {{sprint.end_date}}<br>
+              {% if remaining %}Remained hours: {{remaining}}{% endif %}
+            </div>
+            {% endfor %}
+            {% else %}
+            No previous sprint yet
+            {% endif %}
+          </div>
+
+          <div id="taskEntries">
+            <h3>Sprint {{sprint.number}}</h3>
+            *default duration is 14 days<br>
+            <h5>Tasks for Current Sprint</h5>
+            <table id="taskTable">
+              <tr><th><h5>Not Started</h5></th><th><h5>In Progress</h5></th><th><h5>Complete</h5></th><th><h5>Estimated Effort</h5></th><th><h5>Burndown</h5></th><th><h5>Remaining Effort</h5></th></tr>
+              <tr><td colspan="3" style="text-align: right"><h5>Total</h5></td><td></td><td></td><td></td></tr>
+            </table>
+          </div>
+          {% else %}
+          <h2>No Product Backlog Items in Sprint yet</h2>
+          {% endif %}
+        </div>
+
+      </td>
+
+    </tr>
+  </table>
+
+</div>
+
+{% endblock %}

@@ -2,15 +2,20 @@
 {% extends 'base.html' %}
 
 {% block title %}Home{% endblock %}
-
 {% block content %}
+
+<div id="headline">
+
+Faster Creation, Easier Management, Better Tracking<p>
+for your<p>
+Agile Scrum Project<p>
+
 {% if user.is_authenticated %}
-  Hi, {{ user.name }}!
-  <p><a href="{% url 'backtrack:index' %}"> Projects </a></p>
-  <p><a href="{% url 'logout' %}">logout</a></p>
+<span class="actionButton"><a href="{% url 'backtrack:index' %}">Let's Get Started</a></span>
 {% else %}
-  <p>You are not logged in</p>
-  <a href="{% url 'login' %}">login</a> |
-  <a href="{% url 'backtrack:signup' %}">signup</a>
+<span class="actionButton"><a href="{% url 'login' %}">Let's Get Started</a></span>
 {% endif %}
+
+</div>
+
 {% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}scrumMasterViewSprintBacklogPage{% endblock %}
+{% block content %}
+
+<marquee direction="right" height="30" scrollamount="5" behavior="alternate">Welcome, Scrum Master!</marquee>
+
+<div>
+<span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
+<span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>
+</div>
+
+<div class="tabContent">
+<a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
+<div class="contentTitle">Sprint Backlog</div><p>
+
+
+
+
+
+<div id="pastSprints">
+{% if project.sprint_set.count > 0 %}
+{% for sprint in project.sprint_set.all %}
+<a class="actionButton">
+{% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
+Sprint {{sprint}}
+</a>
+{% endfor %}
+{% else %}
+No sprint is created in this project
+{% endif %}
+</div>
+
+<p>
+
+<div>
+{% if sprint %}
+<span class="contentTitle">Sprint {{sprint.number}}</span><br>
+<span>Tasks in the selected sprint</span><br>
+<table class="displayTable">
+<tr>
+<td class="displayTableCell">Parent PBI</td>
+<td class="displayTableCell">Not Started</td>
+<td class="displayTableCell">In Progress</td>
+<td class="displayTableCell">Complete</td>
+<td class="displayTableCell">Estimated Effort</td>
+<td class="displayTableCell">Burndown</td>
+<td class="displayTableCell">Remaining Effort</td>
+</tr>
+<tr>
+<td class="displayTableCell" colspan="4">Total</td>
+<td class="displayTableCell"></td>
+<td class="displayTableCell"></td>
+<td class="displayTableCell"></td>
+</tr>
+</table>
+{% else %}
+<span class="contentTitle">No Product Backlog Items in this sprint</span>
+{% endif %}
+</div>
+
+
+
+
+
+</div>
+
+{% endblock %}

@@ -1,18 +1,22 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<head>
-  <title>Sprint Backlog</title>
-  <link rel="stylesheet" type="text/css" href="{% static 'backtrackapp/sbStyle.css' %}">
-</head>
+{% block title %}scrumMasterViewSprintBacklogPage{% endblock %}
+{% block content %}
 
-<body>
+<marquee direction="right" height="30" scrollamount="5" behavior="alternate">Welcome, Product Owner! Here is your current project</marquee>
 
-  <div id="heading">
-    <div id="title"><h1>BackTrack</h1></div>
-    <div id="user"><h3>(USERNAME)<br>Developer</h3></div>
-    <div class="subTitle"><a href="{% url 'backtrack:project_pb' project.id %}"><h3>Back to "{{project.name}}" Page</h3></a></div>
-    <div class="subTitle"><a href="{% url 'backtrack:project_pb' sprint.project.id %}"><h3>Back to Product Backlog</h3></a></div>
-  </div>
+<div>
+<span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
+<span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>
+</div>
+
+<div class="tabContent">
+<a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
+<div class="contentTitle">Sprint Backlog</div><p>
+
+
+
 
   <h3>View my Sprint</h3>
 
@@ -72,4 +76,7 @@
     </tr>
   </table>
 
-</body>
+
+</div>
+
+{% endblock %}

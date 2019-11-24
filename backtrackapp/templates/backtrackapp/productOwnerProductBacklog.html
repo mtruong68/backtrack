@@ -1,11 +1,23 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<head>
-  <title>Product Backlog</title>
-  <link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\pbStyle.css' %}">
-</head>
+{% block title %}ProductOwnerProductBacklog{% endblock %}
+{% block content %}
 
-<body>
+<marquee direction="right" height="30" scrollamount="5" behavior="alternate">Welcome, Product Owner! Here is your current project</marquee>
+
+<div>
+<span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
+<span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>
+</div>
+
+<div class="tabContent">
+<a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
+<div class="contentTitle">Product Backlog</div><p>
+
+
+
+
 
   <div id="heading">
     <div id="title"><h1>BackTrack</h1></div>
@@ -53,7 +65,7 @@
               {% for el in pbi_cum_points_list %}
               <tr>
                 <td class="itemPBI">
-                  <b><a href="{% url 'backtrack:modifyPBI' el.pbi.id %}">{{el.pbi.name}}</a></b>
+                  <b><a href="{% url 'backtrack:modify_PBI' el.pbi.id %}" target="_parent">{{el.pbi.name}}</a></b>
                   <input type="hidden" name="pbi" value="{{el.pbi.id}}" />
                 </td>
                 <td class="itemPBI">
@@ -99,7 +111,8 @@
 
     </tr>
   </table>
-
   <div><h3>Total story point: <input type="text" disabled="true" size="10"></h3></div>
 
-</body>
+</div>
+
+{% endblock %}
