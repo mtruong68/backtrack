@@ -271,24 +271,6 @@ class ProductBacklogView(generic.View):
         pbi.delete()
         return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
 
-    def createNewPBI(self, request, pk):
-        project = get_object_or_404(Project, pk=pk)
-        form = NewPBIForm(request.POST, initial={'project': project})
-        if form.is_valid():
-            newPBI = form.save(commit=False)
-            newPBI.project = project
-            if self.checkPriority(pk, request.POST.get('priority')) == False:
-                return HttpResponse("Priority Out of Bounds")
-            else:
-                self.updatePriorities(request, pk, request.POST.get('priority'))
-                newPBI.save()
-                #redirect back to product backlog view
-                return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
-        else:
-            #this is a stub method and needs to be changed
-            print(form.errors)
-            return HttpResponse("Did not work.")
-
     def splitPBI(self, request, pk):
         proj = get_object_or_404(Project, pk=pk)
         num = request.POST.get('numOfChildPBI')
@@ -351,15 +333,49 @@ class ProductBacklogView(generic.View):
 
 
 
-class ModifyPBI(generic.View):
+class NewPBIView(generic.View):
+    def get(self, request, pk):
+        user = request.user
+        if user.is_authenticated:
+            if has_access(user, pk):
+                project = get_object_or_404(Project, pk=pk)
+                context = {'form': NewPBIForm(initial={'project': project})}
+                return render(request, 'backtrackapp/_new_PBI.html', context)
+            else:
+                return Http404("You do not have access to this project.")
+        else:
+            return HttpResponseRedirect(reverse('login'))
+
+    def post(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        form = NewPBIForm(request.POST, initial={'project': project})
+        if form.is_valid():
+            newPBI = form.save(commit=False)
+            newPBI.project = project
+            if ProductBacklogView.checkPriority(self, pk, request.POST.get('priority')) == False:
+                return HttpResponse("Priority Out of Bounds")
+            else:
+                ProductBacklogView.updatePriorities(self, request, pk, request.POST.get('priority'))
+                newPBI.save()
+                #redirect back to product backlog view
+                return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+        else:
+            #this is a stub method and needs to be changed
+            print(form.errors)
+            return HttpResponse("Did not work.")
+
+
+
+
+
+class ModifyPBIView(generic.View):
     #need to sort pbi by priority and show in order of priority
     def get(self, request, pk):
         user = request.user
         if user.is_authenticated:
             pbi = get_object_or_404(ProductBacklogItem, pk=pk)
             if has_access(user, pbi.project_id):
-                context = {'form': NewPBIForm(initial={'pbi': pbi}),
-                'pbi': pbi}
+                context = {'form': NewPBIForm(initial={'pbi': pbi}), 'pbi': pbi}
                 return render(request, 'backtrackapp/_modify_PBI.html', context)
             else:
                 return Http404("You do not have access to this project.")
