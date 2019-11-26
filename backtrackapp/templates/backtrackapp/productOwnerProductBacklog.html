@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}ProductOwnerProductBacklog{% endblock %}
+{% block title %} Product Owner Product Backlog {% endblock %}
 {% block content %}
 
 <marquee direction="right" height="30" scrollamount="5" behavior="alternate">Welcome, Product Owner! Here is your current project</marquee>
@@ -37,18 +37,15 @@
 {% for el in pbi_cum_points_list %}
 <tr>
 <td class="displayTableCell">{{el.pbi.sprint}}</td>
-<td class="displayTableCell">
-{{el.pbi.name}}
-<input type="hidden" name="pbi" value="{{el.pbi.id}}">
-</td>
+<td class="displayTableCell">{{el.pbi.name}}</td>
 <td class="displayTableCell">{{el.pbi.desc}}</td>
 <td class="displayTableCell">{{el.pbi.priority}}</td>
 <td class="displayTableCell">{{el.pbi.storypoints}}</td>
 <td class="displayTableCell">{{el.cum_points}}</td>
 <td class="displayTableCell">{{el.pbi.get_status_display}}</td>
 <td>
-<a href="{% url 'backtrack:modify_PBI' el.pbi.id %}">Modify</a><br>
-<input type="submit" value="Add to Sprint" name="addToSprint"><br>
+<input type="hidden" name="pbi" value="{{el.pbi.id}}">
+<button><a href="{% url 'backtrack:modify_PBI' el.pbi.id %}">Modify</a></button><br>
 <input type="submit" value="Delete" name="deletePBI"><br>
 <input type="text" placeholder="Number of Child PBI" name="numOfChildPBI"><br>
 <input type="submit" value="Split" name="splitPBI">
@@ -57,6 +54,8 @@
 {% endfor %}
 </table>
 </form>
+<p>
+<span class="actionButton"><a href="{% url 'backtrack:new_PBI' project.id %}">Add New PBI</a></span>
 </div>
 
 
@@ -67,14 +66,15 @@
 <div class="contentTitle">PBIs In Progress</div><p>
 <table class="displayTable">
 <tr class="heading">
-<td class="displayTableCell">SPRINT</td>
-<td class="displayTableCell">NAME</td>
-<td class="displayTableCell">DESCRIPTION</td>
-<td class="displayTableCell">PRIORITY</td>
-<td class="displayTableCell">STORY POINT</td>
-<td class="displayTableCell">CUMULATIVE STORY POINTS</td>
+<td class="displayTableCell">Sprint</td>
+<td class="displayTableCell">Name</td>
+<td class="displayTableCell">Description</td>
+<td class="displayTableCell">Priority</td>
+<td class="displayTableCell">Storypoints</td>
+<td class="displayTableCell">Cumulative Storypoints</td>
 </tr>
 {% for el in pbi_cum_points_list %}
+{% if el.pbi.status == 'IP' %}
 <tr>
 <td class="displayTableCell">{{el.pbi.sprint}}</td>
 <td class="displayTableCell">{{el.pbi.name}}</td>
@@ -83,32 +83,11 @@
 <td class="displayTableCell">{{el.pbi.storypoints}}</td>
 <td class="displayTableCell">{{el.cum_points}}</td>
 </tr>
+{% endif %}
 {% endfor %}
 </table>
 </div>
 <div class="divider"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="actionButton"><a href="{% url 'backtrack:new_PBI' project.id %}">Add New PBI</a></span>
-
 
 
 

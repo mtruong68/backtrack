@@ -181,8 +181,4 @@ class modifyPBITest(testCase):
         project = create_project(name="Test project", desc="this is a project for testing")
         sprint = create_sprint(number=1, project=project)
         pbi = create_pbi(name='pbi', desc="pbi for testing", priority=1, storypoints=20, status='NS', project=project, sprint=sprint)
-
-
-
-
 """

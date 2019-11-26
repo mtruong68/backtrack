@@ -14,6 +14,11 @@ class ProjectTeamForm(forms.ModelForm):
         model = ProjectTeam
         prefix = "teamForm"
         exclude = ['project','product_owner']
+        labels = {
+        "teamName": "Team Name",
+        "scrum_master": "Scrum Master",
+        "dev_team": "Development Team"
+        }
 
 class NewProjectForm(forms.ModelForm):
     class Meta:
@@ -21,7 +26,9 @@ class NewProjectForm(forms.ModelForm):
         prefix = "projectForm"
         fields = '__all__'
         labels = {
-        "desc": "Description"
+        "desc": "Description",
+        "endDate": "End Date",
+        "startDate": "Start Date"
         }
 
 class NewPBIForm(forms.ModelForm):

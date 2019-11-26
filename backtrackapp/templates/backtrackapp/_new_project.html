@@ -1,40 +1,50 @@
-<!DOCTYPE html>
-<head>
-  <title>BACKTRACK</title>
-</head>
-<style>
-body {
-  font-family: "Trebuchet MS", Helvetica, sans-serif;
-}
-</style>
-<body>
-  <table style="width:100%">
-    <tr>
-      <td>
-        {% if projects%}
-        <ul>
-          {% for project in projects %}
-          <div>
-            <h3><a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}}</a></h3>
-            <p>{{project.desc}}</p>
-          </div>
-          {% endfor %}
-          <ul>
-        {% else %}
-            <h2> No projects currently </h2>
-        {% endif %}
-          </td>
-          <td>
-            <h2> Create new project </h2>
-            <form method="POST">
-              {% csrf_token %}
-              {{projectForm.as_p}}
-              <p>Product Owner: {{user.name}}</p>
-              {{teamForm.as_p}}
-              <input type="submit" value="Create Project">
-            </form>
-          </td>
-        </tr>
-      </table>
-    </body>
-    </html>
+<span class="contentTitle">Create New Project</span>
+<form method="POST">
+{% csrf_token %}
+
+<table>
+
+{{ projectForm.non_field_errors }}
+{% for field in projectForm.visible_fields %}
+<tr>
+<td valign="top"><div>{{ field.label_tag }}</div></td>
+<td class="fieldWrapper">
+<div>{{ field }}</div>
+<div class="errorFieldWrapper">{{ field.errors }}</div>
+<div class="helpFieldWrapper">{{ field.help_text }}</div>
+</td>
+</tr>
+{% endfor %}
+{% for hidden in projectForm.hidden_fields %}
+{{ hidden }}
+{% endfor %}
+
+<tr>
+<td valign="top"><div>Product Owner:</div></td>
+<td class="fieldWrapper">
+<div>{{user.name}}</div>
+</td>
+</tr>
+
+{% csrf_token %}
+{{ teamForm.non_field_errors }}
+{% for field in teamForm.visible_fields %}
+<tr>
+<td valign="top"><div>{{ field.label_tag }}</div></td>
+<td class="fieldWrapper">
+<div>{{ field }}</div>
+<div class="errorFieldWrapper">{{ field.errors }}</div>
+<div class="helpFieldWrapper">{{ field.help_text }}</div>
+</td>
+</tr>
+{% endfor %}
+{% for hidden in teamForm.hidden_fields %}
+{{ hidden }}
+{% endfor %}
+
+
+</table>
+
+<p>
+<input class="actionButton" type="submit" value="Create Project">
+</form>

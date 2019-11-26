@@ -90,7 +90,7 @@ class IndexView(generic.View):
                     project = get_object_or_404(Project, pk=user.current_project.pk)
                     return ProjectView.get(self, request, project.pk)
                 else:
-                    return NewProjectView.get(self, request)
+                    return render(request, 'backtrackapp/idleDeveloper.html')
         else:
             return HttpResponseRedirect(reverse('login'))
 
@@ -134,7 +134,7 @@ class NewProjectView(generic.View):
                 teamForm.fields['scrum_master'].queryset = User.objects.filter(current_project=None).exclude(pk=user.pk)
                 teamForm.fields['dev_team'].queryset = User.objects.filter(current_project=None).exclude(pk=user.pk)
 
-                return render(request, 'backtrackapp/_new_project.html', {'projectForm': projectForm, 'teamForm': teamForm, 'projects': projects})
+                return render(request, 'backtrackapp/_new_project.html', {'projectForm': projectForm, 'teamForm': teamForm})
         else:
             return HttpResponseRedirect(reverse('login'))
 
@@ -470,6 +470,26 @@ class SprintBacklogView(generic.View):
                 return Http404("You do not have access to this project")
         else:
             return HttpResponseRedirect(reverse('login'))
+
+    def post(self, request, pk):
+        user = request.user
+        project = get_object_or_404(Project, pk=pk)
+        sprintRequest = request.POST.get('sprintNumber')
+        sprint = get_object_or_404(Sprint, pk=sprintRequest)
+        tasksInAllSprintPBIs = []
+        sprintPBI_set = ProductBacklogItem.objects.filter(project=project, sprint=sprint).all()
+        for sprintPBI in sprintPBI_set:
+            task_set = Task.objects.filter(pbi=sprintPBI).all()
+            for task in task_set:
+                tasksInAllSprintPBIs.append(task)
+        context = {'sprint':sprint, 'project': project, 'tasksInAllSprintPBIs': tasksInAllSprintPBIs}
+
+        if is_scrummaster(user):
+            return render(request, 'backtrackapp/scrumMasterSprintBacklog.html', context)
+        elif is_productowner(user, project.pk):
+            return render(request, 'backtrackapp/productOwnerSprintBacklog.html', context)
+        else:
+            return render(request, 'backtrackapp/busyDeveloperSprintBacklog.html', context)
 
 
 

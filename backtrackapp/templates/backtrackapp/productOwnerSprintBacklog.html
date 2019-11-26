@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}scrumMasterViewSprintBacklogPage{% endblock %}
+{% block title %} Product Owner Sprint Backlog {% endblock %}
 {% block content %}
 
 <marquee direction="right" height="30" scrollamount="5" behavior="alternate">Welcome, Product Owner! Here is your current project</marquee>
@@ -18,63 +18,66 @@
 
 
 
-  <h3>View my Sprint</h3>
 
-  <table id="mainFrame">
-    <tr>
+<div id="pastSprints">
+{% if project.sprint_set.count > 0 %}
+<form method="POST">
+{% csrf_token %}
+{% for sprint in project.sprint_set.all %}
+<button class="actionButton" name="sprintNumber" type="submit" value="{{sprint.id}}"">
+<a>
+{% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
+Sprint {{sprint}}
+</a>
+</button>
+{% endfor %}
+</form>
+{% else %}
+<span class="contentTitle">No sprint is created in this project</span><p>
+{% endif %}
+</div>
 
-      <td>
-        <div id="productBacklog">
-          <h5>Product Backlog</h5>
-          <table>
-            <tr><th><h5>PBIs for Current Sprint</h5></th></tr>
-            {% for pbi in sprint.productbacklogitem_set.all %}
-            <tr><td class="PBI"><b><a href="{% url 'backtrack:new_task' pbi.id %}">{{pbi.name}}</a></b>: {{pbi.desc}}</td></tr>
-            {% endfor %}
-          </table>
-        </div>
-      </td>
+<p>
 
-      <td>
+<div>
+{% if tasksInAllSprintPBIs %}
+<span class="contentTitle">Sprint {{sprint}}</span><br>
+<span>Tasks in the selected sprint</span><br>
+<table class="displayTable">
+<tr>
+<td class="displayTableCell">Parent PBI</td>
+<td class="displayTableCell">Description</td>
+<td class="displayTableCell">Status</td>
+<td class="displayTableCell">Developer(s) In Charge</td>
+<td class="displayTableCell">Estimated Effort</td>
+<td class="displayTableCell">Burndown</td>
+<td class="displayTableCell">Remaining Effort</td>
+</tr>
+{% for task in tasksInAllSprintPBIs %}
+<tr>
+<td class="displayTableCell">{{ task.pbi }}</td>
+<td class="displayTableCell">{{ task.desc }}</td>
+<td class="displayTableCell">{{ task.get_status_display }}</td>
+<td class="displayTableCell">{{ task.assignment }}</td>
+<td class="displayTableCell">{{ task.estimate }}</td>
+<td class="displayTableCell">{{ task.burndown }}</td>
+<td class="displayTableCell"></td>
+</tr>
+{% endfor %}
+<tr>
+<td class="displayTableCell" colspan="4">Total</td>
+<td class="displayTableCell"></td>
+<td class="displayTableCell"></td>
+<td class="displayTableCell"></td>
+</tr>
+</table>
+{% else %}
+<span class="contentTitle">No PBIs/tasks in the selected sprint</span><p>
+{% endif %}
+</div>
 
-        <div id="sprintBacklog">
-          {% if sprint %}
-          <div id="pastSprints">
-            Sprint History<br>
-            Number of sprint: {{project.sprint_set.count}}<br>
-            {% if sprint.project.sprint_set.count > 0 %}
-            {% for sprint in project.sprint_set.all %}
-            <div class="sprint">
-              {% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
-              Sprint {{sprint}}<br>
-              Start Day: {{sprint.start_date}}<br>
-              End Day: {{sprint.end_date}}<br>
-              {% if remaining %}Remained hours: {{remaining}}{% endif %}
-            </div>
-            {% endfor %}
-            {% else %}
-            No previous sprint yet
-            {% endif %}
-          </div>
 
-          <div id="taskEntries">
-            <h3>Sprint {{sprint.number}}</h3>
-            *default duration is 14 days<br>
-            <h5>Tasks for Current Sprint</h5>
-            <table id="taskTable">
-              <tr><th><h5>Not Started</h5></th><th><h5>In Progress</h5></th><th><h5>Complete</h5></th><th><h5>Estimated Effort</h5></th><th><h5>Burndown</h5></th><th><h5>Remaining Effort</h5></th></tr>
-              <tr><td colspan="3" style="text-align: right"><h5>Total</h5></td><td></td><td></td><td></td></tr>
-            </table>
-          </div>
-          {% else %}
-          <h2>No Product Backlog Items in Sprint yet</h2>
-          {% endif %}
-        </div>
 
-      </td>
-
-    </tr>
-  </table>
 
 
 </div>

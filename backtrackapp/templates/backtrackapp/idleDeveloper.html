@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %} Idle Developer Create New Project {% endblock %}
+{% block content %}
+
+<div id="headline">
+<span class="headlineHeading">You don't have any currently ongoing project. Do you want to create a new project now?</span><p>
+<span class="actionButton"><a href="{% url 'backtrack:new_project' %}">Create New Project Now</a></span>
+</div>
+
+{% endblock %}

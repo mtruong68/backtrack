@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}ScrumMasterProductBacklog{% endblock %}
+{% block title %} Scrum Master Product Backlog {% endblock %}
 {% block content %}
 
 <marquee direction="right" height="30" scrollamount="5" behavior="alternate">Welcome, Scrum Master!</marquee>
@@ -54,14 +54,15 @@
 <div class="contentTitle">PBIs In Progress</div><p>
 <table class="displayTable">
 <tr class="heading">
-<td class="displayTableCell">SPRINT</td>
-<td class="displayTableCell">NAME</td>
-<td class="displayTableCell">DESCRIPTION</td>
-<td class="displayTableCell">PRIORITY</td>
-<td class="displayTableCell">STORY POINT</td>
-<td class="displayTableCell">CUMULATIVE STORY POINTS</td>
+<td class="displayTableCell">Sprint</td>
+<td class="displayTableCell">Name</td>
+<td class="displayTableCell">Description</td>
+<td class="displayTableCell">Priority</td>
+<td class="displayTableCell">Storypoints</td>
+<td class="displayTableCell">Cumulative Storypoints</td>
 </tr>
 {% for el in pbi_cum_points_list %}
+{% if el.pbi.status == 'IP' %}
 <tr>
 <td class="displayTableCell">{{el.pbi.sprint}}</td>
 <td class="displayTableCell">{{el.pbi.name}}</td>
@@ -70,6 +71,7 @@
 <td class="displayTableCell">{{el.pbi.storypoints}}</td>
 <td class="displayTableCell">{{el.cum_points}}</td>
 </tr>
+{% endif %}
 {% endfor %}
 </table>
 </div>
