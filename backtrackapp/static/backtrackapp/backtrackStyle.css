@@ -1,0 +1,168 @@
+/* General */
+
+html, input, button, select, option {
+font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
+input, select {
+width: 200px;
+border-radius: 10px;
+border-style: solid;
+border-color: lightgrey;
+padding-left: 5px;
+padding-right: 5px;
+}
+
+a {
+text-decoration: none;
+cursor: pointer;
+}
+
+a:link {color: black;}
+a:visited {color: black;}
+a:hover {color: lightgrey;}
+a:active {color: lightgrey;}
+
+.actionButton a:link {color: white;}
+.actionButton a:visited {color: white;}
+.actionButton a:hover {color: lightgrey;}
+.actionButton a:active {color: lightgrey;}
+
+div#title {
+display: inline-block;
+}
+
+div#menuButtonBar {
+float: right;
+padding-top: 30px;
+}
+
+div#headline {
+font-size: 1.5em;
+text-align: center;
+}
+
+.headlineHeading {
+font-weight: bold;
+}
+
+.actionButton {
+font-family: "Trebuchet MS", Helvetica, sans-serif;
+font-size: 16px;
+background: #208f8f;
+border-radius: 20px;
+color: #fff;
+box-shadow: none;
+border: none;
+text-shadow: none;
+padding: .5rem .8rem;
+}
+
+.contentTitle {
+font-size: 1.5em;
+font-weight: bold;
+}
+
+.fieldWrapper {
+padding-left: 5px;
+}
+
+.errorFieldWrapper {
+font-size: 12px;
+color: red;
+font-weight: bold;
+}
+
+.helpFieldWrapper {
+font-size: 12px;
+color: lightgrey;
+font-weight: bold;
+}
+
+/* Project */
+
+.projectBlock {
+margin-top: 10px;
+width:30%;
+height:auto;
+border: 2px solid black;
+padding: 5px;
+text-align: center;
+display:inline-block;
+border-radius: 15px;
+}
+
+.projectInfoBlock {
+padding: 2px;
+text-align: left;
+}
+
+.iconPin {
+height:20px;
+width:20px;
+display: block;
+float: right;
+}
+
+.iconBell {
+height:20px;
+width:20px;
+display: block;
+float: left;
+}
+
+.iconEnlarge {
+height:20px;
+width:20px;
+display: block;
+float: right;
+}
+
+.iconCollapse {
+height:20px;
+width:20px;
+display: block;
+float: right;
+}
+
+/* Product Backlog */
+
+.tabContent {
+padding: 5px;
+margin-top: 10px;
+border: 2px solid black;
+}
+
+.columnView {
+display: inline-block;
+height: 65%;
+width: 45%;
+overflow-x: scroll;
+overflow-y: scroll;
+}
+
+.divider {
+display: inline-block;
+width: 5%;
+}
+
+table.displayTable {
+border-collapse: collapse;
+font-size: 10px;
+width: 100%;
+}
+
+td.displayTableCell {
+border: 2px solid lightgrey;
+text-align: center;
+}
+
+/* Sprint Backlog */
+
+#pastSprints {
+border: 2px solid black;
+white-space: nowrap;
+overflow-x: scroll;
+padding-top: 15px;
+padding-left: 5px;
+}

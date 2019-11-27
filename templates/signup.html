@@ -2,12 +2,34 @@
 {% extends 'base.html' %}
 
 {% block title %}Sign Up{% endblock %}
-
 {% block content %}
-<h2>Sign up</h2>
+
+<span class="contentTitle">Registration</span><br>
+Please fill in all the information<p>
+
 <form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Sign up</button>
+{% csrf_token %}
+{{ form.non_field_errors }}
+
+<table>
+{% for field in form.visible_fields %}
+<tr>
+<td valign="top"><div>{{ field.label_tag }}</div></td>
+<td class="fieldWrapper">
+<div>{{ field }}</div>
+<div class="errorFieldWrapper">{{ field.errors }}</div>
+<div class="helpFieldWrapper">{{ field.help_text }}</div>
+</td>
+</tr>
+{% endfor %}
+</table>
+
+{% for hidden in form.hidden_fields %}
+{{ hidden }}
+{% endfor %}
+
+<p>
+<button class="actionButton" type="submit"><a>Register</a></button>
 </form>
+
 {% endblock %}

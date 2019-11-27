@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Scrum Master Sprint Backlog {% endblock %}
+{% block content %}
+
+<marquee direction="right" height="30" scrollamount="5" behavior="alternate">Welcome, Scrum Master!</marquee>
+
+<div>
+<span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
+<span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>
+</div>
+
+<div class="tabContent">
+<a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
+<div class="contentTitle">Sprint Backlog</div><p>
+
+
+
+
+
+<div id="pastSprints">
+{% if project.sprint_set.count > 0 %}
+<form method="POST">
+{% csrf_token %}
+{% for sprint in project.sprint_set.all %}
+<button class="actionButton" name="sprintNumber" type="submit" value="{{sprint.id}}"">
+<a>
+{% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
+Sprint {{sprint}}
+</a>
+</button>
+{% endfor %}
+</form>
+{% else %}
+<span class="contentTitle">No sprint is created in this project</span><p>
+{% endif %}
+</div>
+
+<p>
+
+<div>
+{% if tasksInAllSprintPBIs %}
+<span class="contentTitle">Sprint {{sprint}}</span><br>
+<span>Tasks in the selected sprint</span><br>
+<table class="displayTable">
+<tr>
+<td class="displayTableCell">Parent PBI</td>
+<td class="displayTableCell">Description</td>
+<td class="displayTableCell">Status</td>
+<td class="displayTableCell">Developer(s) In Charge</td>
+<td class="displayTableCell">Estimated Effort</td>
+<td class="displayTableCell">Burndown</td>
+<td class="displayTableCell">Remaining Effort</td>
+</tr>
+{% for task in tasksInAllSprintPBIs %}
+<tr>
+<td class="displayTableCell">{{ task.pbi }}</td>
+<td class="displayTableCell">{{ task.desc }}</td>
+<td class="displayTableCell">{{ task.get_status_display }}</td>
+<td class="displayTableCell">{{ task.assignment }}</td>
+<td class="displayTableCell">{{ task.estimate }}</td>
+<td class="displayTableCell">{{ task.burndown }}</td>
+<td class="displayTableCell"></td>
+</tr>
+{% endfor %}
+<tr>
+<td class="displayTableCell" colspan="4">Total</td>
+<td class="displayTableCell"></td>
+<td class="displayTableCell"></td>
+<td class="displayTableCell"></td>
+</tr>
+</table>
+{% else %}
+<span class="contentTitle">No PBIs/tasks in the selected sprint</span><p>
+{% endif %}
+</div>
+
+
+
+
+
+</div>
+
+{% endblock %}

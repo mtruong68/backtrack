@@ -6,13 +6,19 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('username', 'email', 'name')
+        fields = ('username', 'email', 'name', 'role')
+        exclude = ['avaliable','current_project']
 
 class ProjectTeamForm(forms.ModelForm):
     class Meta:
         model = ProjectTeam
         prefix = "teamForm"
         exclude = ['project','product_owner']
+        labels = {
+        "teamName": "Team Name",
+        "scrum_master": "Scrum Master",
+        "dev_team": "Development Team"
+        }
 
 class NewProjectForm(forms.ModelForm):
     class Meta:
@@ -20,7 +26,9 @@ class NewProjectForm(forms.ModelForm):
         prefix = "projectForm"
         fields = '__all__'
         labels = {
-        "desc": "Description"
+        "desc": "Description",
+        "endDate": "End Date",
+        "startDate": "Start Date"
         }
 
 class NewPBIForm(forms.ModelForm):

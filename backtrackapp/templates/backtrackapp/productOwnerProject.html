@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Product Owner Project {% endblock %}
+{% block content %}
+
+<marquee direction="right" height="30" scrollamount="5" behavior="alternate">Welcome, Product Owner! Here is your current project</marquee>
+
+<div class="projectBlock">
+<img class="iconPin" src="{% static '\backtrackapp\images\icon1.jpg' %}">
+<img class="iconBell" src="{% static '\backtrackapp\images\icon3.jpg' %}">
+<br>
+<span class="contentTitle">{{currentProject}}</span><br>
+<div class="projectInfoBlock">
+<span class="helpFieldWrapper">Description:<br>{{currentProject.desc}}</span><br>
+<span class="helpFieldWrapper">Status:<br>{{currentProject.get_status_display}}</span><br>
+<span class="helpFieldWrapper">Start Date:<br>{{currentProject.startDate}}</span><br>
+<span class="helpFieldWrapper">End Date:<br>{{currentProject.endDate}}</span><br>
+</div>
+<a href="{% url 'backtrack:project_pb' currentProject.id %}"><img class="iconEnlarge" src="{% static '\backtrackapp\images\icon2.jpg' %}"></a>
+</div>
+
+{% endblock %}
