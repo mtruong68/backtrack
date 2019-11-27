@@ -27,12 +27,16 @@ font-family: "Trebuchet MS", Helvetica, sans-serif;
 <form method="POST">{% csrf_token %}
 <h3>PBI {{pbi.name}}</h3>
 <input type="hidden" name="pbi" value="{{pbi.id}}">
-<div>
-Name: <input type="text" value={{pbi.name}} name="newName">
-</div><br>
-<div>
-Description: <input type="text" value={{pbi.desc}} name="newDesc">
-</div><br>
+
+{% autoescape off %}
+  <div>
+    Name: <input type="text" value="{{pbi.name|escape}}" name="newName">
+  </div><br>
+  <div>
+    Description: <input type="text" value="{{pbi.desc|escape|safe}}" name="newDesc">
+  </div><br>
+{% endautoescape %}
+
 <div>
 Priority: <input type="text" value={{pbi.priority}} name="newPri">
 </div><br>

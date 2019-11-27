@@ -4,8 +4,6 @@
 {% block title %} Busy Developer Product Backlog {% endblock %}
 {% block content %}
 
-<marquee direction="right" height="30" scrollamount="5" behavior="alternate">Welcome, Developer! Here is your current project</marquee>
-
 <div>
 <span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
 <span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>

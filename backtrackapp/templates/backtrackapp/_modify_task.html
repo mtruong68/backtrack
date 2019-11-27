@@ -42,8 +42,11 @@ font-family: "Trebuchet MS", Helvetica, sans-serif;
 <div id="main">
 <form method="POST" id="modTaskForm">
 {% csrf_token %}
-<div>Task Title: <input type="text" value={{task.name}} name='name'></div>
-<div>PBI: <input type="text" value={{task.name}} name='name'></div>
+
+{% autoescape off %}
+<div>Task Title: <input type="text" value="{{task.name|escape}}" name='name'></div>
+<div>PBI: <input type="text" value="{{task.name|escape}}" name='name'></div>
+{% endautoescape %}
 
 <div>Current Devs on Task:</div>
 <div>

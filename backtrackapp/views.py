@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 
+from html import unescape
+
 from .forms import NewProjectForm, NewPBIForm, NewTaskForm, ProjectTeamForm, CustomUserCreationForm
 from .models import Project, ProductBacklogItem, Sprint, User, ProjectTeam, Task
 
@@ -402,6 +404,7 @@ class ModifyPBIView(generic.View):
             pbi.status = request.POST.get('newSta')
             pbi.save()
             return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pbi.project.pk,)))
+
 
     def checkPriority(self, request, pk):
         pbi_id = request.POST.get('pbi')
