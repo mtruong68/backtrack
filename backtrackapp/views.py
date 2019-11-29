@@ -250,6 +250,7 @@ class ProductBacklogView(generic.View):
             return self.splitPBI(request, pk)
         if 'modifyPBI' in self.request.POST:
             pbi_id = request.POST.get('pbi')
+            print(request.POST)
             return HttpResponseRedirect(reverse('backtrack:modify_PBI', args=(pbi_id,)))
         else:
             #this is a stub method and needs to be changed
@@ -460,7 +461,6 @@ class SprintBacklogView(generic.View):
             if has_access(user, pk):
                 project = get_object_or_404(Project, pk=pk)
                 sprint = Sprint.objects.filter(project=project).all()
-                pbis = ProductBacklogItem.objects.filter(project=project).all()
 
                 if is_scrummaster(user):
                     return render(request, 'backtrackapp/scrumMasterSprintBacklog.html', {'sprint':sprint, 'project': project})
