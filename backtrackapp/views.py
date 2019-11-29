@@ -74,13 +74,6 @@ class SignUpView(generic.CreateView):
     template_name = 'signup.html'
 
 
-
-
-
-#We need to create different index views based on the type of role the user has
-#if no current project or is the product owner, show the product backlog first
-#if a developer, show the task view
-#do the manager stuff later
 class IndexView(generic.View):
     def get(self, request):
         user = request.user
@@ -222,7 +215,7 @@ class ProductBacklogView(generic.View):
                 #get the latest sprint and show the sprint backlog of that sprint
                 sprints = project.sprint_set.all()
                 if len(sprints) > 0:
-                    latestSprint = sprints.latest('start_date')
+                    latestSprint = sprints.latest('creation_time')
                 else:
                     latestSprint = None
 
@@ -462,10 +455,18 @@ class SprintBacklogView(generic.View):
                 project = get_object_or_404(Project, pk=pk)
                 sprint = Sprint.objects.filter(project=project).all()
 
+                latestSprint = project.getLatestSprint()
+                if latestSprint == None or latestSprint.status == 'C':
+                    status = 1
+                elif latestSprint.status == 'NS':
+                    status = 2
+                elif latestSprint.status == 'IP':
+                    status = 3
+
                 if is_scrummaster(user):
                     return render(request, 'backtrackapp/scrumMasterSprintBacklog.html', {'sprint':sprint, 'project': project})
                 elif is_productowner(user, project.pk):
-                    return render(request, 'backtrackapp/productOwnerSprintBacklog.html', {'sprint':sprint, 'project': project})
+                    return render(request, 'backtrackapp/productOwnerSprintBacklog.html', {'sprint':sprint, 'project': project, 'status': status})
                 else:
                     return render(request, 'backtrackapp/busyDeveloperSprintBacklog.html', {'sprint':sprint, 'project': project})
 
@@ -475,17 +476,54 @@ class SprintBacklogView(generic.View):
             return HttpResponseRedirect(reverse('login'))
 
     def post(self, request, pk):
+        #allow user to choose which sprint they want to view and then render the correct sprint w tasks & pbi
         user = request.user
         project = get_object_or_404(Project, pk=pk)
-        sprintRequest = request.POST.get('sprintNumber')
-        sprint = get_object_or_404(Sprint, pk=sprintRequest)
+
+        #possible methods of posting
+        #getting a sprint sprint number
+        if request.POST.get('sprint_id') != None:
+            sprint_id = request.POST.get('sprint_id')
+            sprint = get_object_or_404(Sprint, pk=sprint_id)
+            return self.renderSprint(request, sprint, project)
+        elif request.POST.get('sprint_action') != None:
+            latestSprint = project.getLatestSprint()
+            if latestSprint == None or latestSprint.status == 'C':
+                return self.createNewSprint(project)
+            else:
+                if latestSprint.status == 'NS':
+                    project.startCurrentSprint()
+                    return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+                elif latestSprint.status =='IP':
+                    project.endCurrentSprint()
+                    return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+
+    def createNewSprint(self, project):
+        newSprint = project.createNewSprint()
+        newSprint.save()
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(newSprint.pk,)))
+
+    def renderSprint(self, request, sprint, project):
+        user = request.user
+
         tasksInAllSprintPBIs = []
+
         sprintPBI_set = ProductBacklogItem.objects.filter(project=project, sprint=sprint).all()
+
         for sprintPBI in sprintPBI_set:
             task_set = Task.objects.filter(pbi=sprintPBI).all()
             for task in task_set:
                 tasksInAllSprintPBIs.append(task)
-        context = {'sprint':sprint, 'project': project, 'tasksInAllSprintPBIs': tasksInAllSprintPBIs}
+
+        latestSprint = project.getLatestSprint()
+        if latestSprint == None or latestSprint.status == 'C':
+            status = 1
+        elif latestSprint.status == 'NS':
+            status = 2
+        else:
+            status = 3
+
+        context = {'sprint':sprint, 'project': project, 'tasksInAllSprintPBIs': tasksInAllSprintPBIs, 'status':status}
 
         if is_scrummaster(user):
             return render(request, 'backtrackapp/scrumMasterSprintBacklog.html', context)
@@ -493,7 +531,6 @@ class SprintBacklogView(generic.View):
             return render(request, 'backtrackapp/productOwnerSprintBacklog.html', context)
         else:
             return render(request, 'backtrackapp/busyDeveloperSprintBacklog.html', context)
-
 
 
 
@@ -549,10 +586,6 @@ class NewTaskView(generic.View):
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
-
-
-
-
 
 class ModifyTaskView(generic.View):
     def get(self, request, pk):

@@ -1,11 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 import datetime
-
-
-
-
 
 class Project(models.Model):
     STATUS = (
@@ -22,8 +19,39 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+    def getLatestSprint(self):
+        sprints = self.sprint_set.all()
+        if len(sprints) == 0:
+            return None
+        else:
+            return sprints.order_by('-creation_time')[0]
 
+    def createNewSprint(self):
+        #if you have a current sprint that is in progress, do not allow creation of new sprint
+        latestSprint = self.getLatestSprint()
 
+        if latestSprint != None:
+            latestNumber = latestSprint.number + 1
+            if latestSprint.status != 'C':
+                return -1
+        else:
+            latestNumber = 1;
+
+        sprint = Sprint(number=latestNumber, project=self)
+        return sprint;
+
+    def startCurrentSprint(self):
+        latestSprint = getLatestSprint()
+        if latestSprint == None or latestSprint.status != 'NS':
+            return -1
+        else:
+            latestSprint.status = 'IP'
+        latestSprint.save()
+
+    def endCurrentSprint(self):
+        #get all the pbi from the current sprint set and set their sprint to none
+        #change status to complete
+        pass
 
 
 class User(AbstractUser):
@@ -64,14 +92,15 @@ class Sprint(models.Model):
         ('C', 'Complete'),
     )
     number = models.PositiveIntegerField()
-    start_date = models.DateTimeField(default=timezone.now)
-    end_date = models.DateTimeField(default=timezone.now)
+    creation_time = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=2, choices=STATUS, default='NS')
     totalCapacity = models.PositiveIntegerField(default=0)
     project = models.ForeignKey(Project, on_delete = models.CASCADE)
 
     def __str__(self):
         return str(self.number)
+
+
 
 
 
@@ -93,9 +122,6 @@ class ProductBacklogItem(models.Model):
 
     def __str__(self):
         return self.name
-
-
-
 
 
 class Task(models.Model):
