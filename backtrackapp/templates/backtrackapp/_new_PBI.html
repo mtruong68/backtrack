@@ -1,34 +1,33 @@
 {% load static %}
 
 <head>
-<meta charset="utf-8">
-<title>New PBI</title>
-<link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
+  <meta charset="utf-8">
+  <title>New PBI</title>
+  <link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
 </head>
 
 <span class="contentTitle">Create New PBI</span><p>
 
 <form method="POST">
-{% csrf_token %}
-{{ form.non_field_errors }}
+  {% csrf_token %}
+  {{ form.non_field_errors }}
 
-<table>
-{% for field in form.visible_fields %}
-<tr>
-<td valign="top"><div>{{ field.label_tag }}</div></td>
-<td class="fieldWrapper">
-<div>{{ field }}</div>
-<div class="errorFieldWrapper">{{ field.errors }}</div>
-<div class="helpFieldWrapper">{{ field.help_text }}</div>
-</td>
-</tr>
-{% endfor %}
-</table>
+  <table>
+    {% for field in form.visible_fields %}
+    <tr>
+      <td valign="top"><div>{{ field.label_tag }}</div></td>
+      <td class="fieldWrapper">
+        <div>{{ field }}</div>
+        <div class="errorFieldWrapper">{{ field.errors }}</div>
+        <div class="helpFieldWrapper">{{ field.help_text }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
 
-{% for hidden in form.hidden_fields %}
-{{ hidden }}
-{% endfor %}
+  {% for hidden in form.hidden_fields %}
+  {{ hidden }}
+  {% endfor %}
 
-<p>
-<input class="actionButton" type="submit" value="Create New PBI" name="createNewPBI">
+  <p><input class="actionButton" type="submit" value="Create New PBI" name="createNewPBI">
 </form>
