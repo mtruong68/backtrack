@@ -1,4 +1,13 @@
-<span class="contentTitle">Create New Project</span>
+{% load static %}
+
+<head>
+<meta charset="utf-8">
+<title>New Project</title>
+<link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
+</head>
+
+<span class="contentTitle">Create New Project</span><p>
+
 <form method="POST">
 {% csrf_token %}
 
@@ -26,7 +35,6 @@
 </td>
 </tr>
 
-{% csrf_token %}
 {{ teamForm.non_field_errors }}
 {% for field in teamForm.visible_fields %}
 <tr>
@@ -42,9 +50,7 @@
 {{ hidden }}
 {% endfor %}
 
-
 </table>
-
 <p>
 <input class="actionButton" type="submit" value="Create Project">
 </form>

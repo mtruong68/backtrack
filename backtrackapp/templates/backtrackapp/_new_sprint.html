@@ -1,3 +1,10 @@
+{% load static %}
+
+<head>
+<meta charset="utf-8">
+<title>Modify PBI</title>
+<link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
+</head>
 
 <h3> <a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}} </a>create Sprint</h3>
 

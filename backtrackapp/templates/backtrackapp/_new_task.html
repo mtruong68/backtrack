@@ -1,27 +1,35 @@
+{% load static %}
+
+<head>
+<meta charset="utf-8">
+<title>Modify PBI</title>
+<link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
+</head>
+
 <h3>Task View for {{pbi.name}}</h3>
 <a href="{% url 'backtrack:project_sb' pbi.sprint.id %}"> Back to Sprint Backlog</a>
 
-  {% if pbi.task_set.all.count == 0 %}
-  No Tasks for PBI yet
-  {% endif %}
-  {% for task in pbi.task_set.all %}
-   <div>
-     <form method="POST">{% csrf_token %}
-       <p><b>{{task.name}}</b>: {{task.desc}}, Burndown: {{task.burndown}},
-       Estimated Time: {{task.estimate}}, Assigned To:
-       {% for assign in task.assignment.all %}
-       {{assign.name}}/
-       {% endfor %}, Status: {{task.status}}</p>
-       <input type="hidden" name="task" value="{{task.id}}" />
-       <input type="submit" value="Modify Task" name="modifyTask">
-       <input type="submit" value="Delete Task" name="deleteTask">
-      </form>
-  </div>
-  {% endfor %}
+{% if pbi.task_set.all.count == 0 %}
+No Tasks for PBI yet
+{% endif %}
+{% for task in pbi.task_set.all %}
+<div>
+<form method="POST">{% csrf_token %}
+<p><b>{{task.name}}</b>: {{task.desc}}, Burndown: {{task.burndown}},
+Estimated Time: {{task.estimate}}, Assigned To:
+{% for assign in task.assignment.all %}
+{{assign.name}}/
+{% endfor %}, Status: {{task.status}}</p>
+<input type="hidden" name="task" value="{{task.id}}" />
+<input type="submit" value="Modify Task" name="modifyTask">
+<input type="submit" value="Delete Task" name="deleteTask">
+</form>
+</div>
+{% endfor %}
 
 <h3>Add Task</h3>
 <form method="POST">
-  {% csrf_token %}
-  {{form.as_p}}
-  <input type="submit" value="Add task" name="addTask">
+{% csrf_token %}
+{{form.as_p}}
+<input type="submit" value="Add task" name="addTask">
 </form>
