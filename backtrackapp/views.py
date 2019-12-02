@@ -371,7 +371,18 @@ class ModifyPBIView(generic.View):
         if user.is_authenticated:
             pbi = get_object_or_404(ProductBacklogItem, pk=pk)
             if has_access(user, pbi.project_id):
-                context = {'form': NewPBIForm(initial={'pbi': pbi}), 'pbi': pbi}
+
+                choices = [
+                    {'value': 'NS', 'status':'Not Started'},
+                    {'value': 'IP', 'status':'In Progress'},
+                    {'value': 'C', 'status': 'Complete'}
+                ]
+
+                for choice in choices:
+                    if choice['value'] == pbi.status:
+                        choice['selected'] = "selected"
+
+                context = {'form': NewPBIForm(initial={'pbi': pbi}), 'pbi': pbi, 'choices': choices}
                 return render(request, 'backtrackapp/_modify_PBI.html', context)
             else:
                 return Http404("You do not have access to this project.")
@@ -422,7 +433,7 @@ class ModifyPBIView(generic.View):
             return
 
         pbis = pbi.project.productbacklogitem_set.all()
-        print(pbis)
+
         if old_priority < new_priority:
             for i in pbis:
                 if i.priority <= new_priority and i.priority > old_priority:

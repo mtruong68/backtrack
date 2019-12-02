@@ -41,7 +41,7 @@ class Project(models.Model):
         return sprint;
 
     def startCurrentSprint(self):
-        latestSprint = getLatestSprint()
+        latestSprint = self.getLatestSprint()
         if latestSprint == None or latestSprint.status != 'NS':
             return -1
         else:

@@ -1,91 +1,91 @@
 <head>
-<title>Modify Task</title>
+  <title>Modify Task</title>
 </head>
 
 <style>
-input {
-font-family: "Trebuchet MS", Helvetica, sans-serif;
-}
+  input {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+  }
 
-button {
-font-family: "Trebuchet MS", Helvetica, sans-serif;
-}
+  button {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+  }
 
-div#main {
-border: 3px solid black;
-overflow-y: scroll;
-background-color: white;
-padding: 10px;
-}
+  div#main {
+    border: 3px solid black;
+    overflow-y: scroll;
+    background-color: white;
+    padding: 10px;
+  }
 
-div#mainFrame {
-border: 3px solid black;
-padding: 10px;
-background-color: lightgrey;
-}
+  div#mainFrame {
+    border: 3px solid black;
+    padding: 10px;
+    background-color: lightgrey;
+  }
 
-.mydiv {
-margin: auto;
-width: auto;
-border: 3px solid black;
-padding: 10px;
-}
+  .mydiv {
+    margin: auto;
+    width: auto;
+    border: 3px solid black;
+    padding: 10px;
+  }
 
-body {
-font-family: "Trebuchet MS", Helvetica, sans-serif;
-}
+  body {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+  }
 </style>
 
 <body>
-<div id="mainFrame">
-<h3> Modify Task: {{task.name}}</h3>
-<div id="main">
-<form method="POST" id="modTaskForm">
-{% csrf_token %}
+  <div id="mainFrame">
+    <h3> Modify Task: {{task.name}}</h3>
+    <div id="main">
+      <form method="POST" id="modTaskForm">
+        {% csrf_token %}
 
-{% autoescape off %}
-<div>Task Title: <input type="text" value="{{task.name|escape}}" name='name'></div>
-<div>PBI: <input type="text" value="{{task.name|escape}}" name='name'></div>
-{% endautoescape %}
+        {% autoescape off %}
+        <div>Task Title: <input type="text" value="{{task.name|escape}}" name='name'></div>
+        <div>PBI: <input type="text" value="{{task.name|escape}}" name='name'></div>
+        {% endautoescape %}
 
-<div>Current Devs on Task:</div>
-<div>
-{% for user in task.assignment.all %}
-{{user.name}}
-<input type="hidden" name="user" value={{user.id}}>
-<input type="submit" value="Delete Dev from Task" name="deleteUser">
-{% endfor %}
-</div>
+        <div>Current Devs on Task:</div>
+        <div>
+          {% for user in task.assignment.all %}
+          {{user.name}}
+          <input type="hidden" name="user" value={{user.id}}>
+          <input type="submit" value="Delete Dev from Task" name="deleteUser">
+          {% endfor %}
+        </div>
 
-<div>
-<div> Add Dev to Task: </div>
-<select name="assignment" form="modTaskForm" multiple>
-{% for user in availableUsers %}
-<option value={{user.pk}}>{{user.name}}</option>
-{% endfor %}
-</select>
-</div>
+        <div>
+          <div> Add Dev to Task: </div>
+          <select name="assignment" form="modTaskForm" multiple>
+            {% for user in availableUsers %}
+            <option value={{user.pk}}>{{user.name}}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-<div> Status:
-<select name="status" form="modTaskForm">
-{% for option in choices %}
-<option value={{option.value}} selected={{option.selected}}>{{option.status}}</option>
-{% endfor %}
-</select>
-</div>
+        <div> Status:
+          <select name="status" form="modTaskForm">
+            {% for option in choices %}
+            <option value={{option.value}} selected={{option.selected}}>{{option.status}}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-<div>Description: </div>
-<textarea rows="8" cols="80" value={{task.desc}} name='desc'></textarea>
-<div>PBI: <input type="text" value={{task.name}} name='name'></div>
-<div>Burndown: <input type="number" value={{task.burndown}} name='burndown'></div>
+        <div>Description: </div>
+        <textarea rows="8" cols="80" value={{task.desc}} name='desc'></textarea>
+        <div>PBI: <input type="text" value={{task.name}} name='name'></div>
+        <div>Burndown: <input type="number" value={{task.burndown}} name='burndown'></div>
 
 
 
-<button>Cancel</button>
-<input type="submit" value="Save" name="modifyTask">
-</form>
-</div>
-<a href="{% url 'backtrack:new_task' task.pbi.id %}">Back to PBI Task View</a>
-<a href="{% url 'backtrack:project_sb' task.pbi.sprint.id %}">Back to Sprint Backlog</a>
-</div>
+        <button>Cancel</button>
+        <input type="submit" value="Save" name="modifyTask">
+      </form>
+    </div>
+    <a href="{% url 'backtrack:new_task' task.pbi.id %}">Back to PBI Task View</a>
+    <a href="{% url 'backtrack:project_sb' task.pbi.sprint.id %}">Back to Sprint Backlog</a>
+  </div>
 </body>
