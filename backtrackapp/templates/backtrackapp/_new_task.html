@@ -2,15 +2,14 @@
 <a href="{% url 'backtrack:project_sb' pbi.sprint.id %}"> Back to Sprint Backlog</a>
 
 <h3>Add Task</h3>
-<form method="POST">
+<form method="POST" id="newTaskForm">
   {% csrf_token %}
   {{form.as_p}}
-  <div> Assign Developer to Task:
-    <select name="assignment" form="modTaskForm">
-      {% for user in availableUsers %}
-      <option value={{user.pk}}>{{user.name}}</option>
-      {% endfor %}
-    </select>
-  </div>
+  Assign Developer to Task:
+  <select name="assignment" form="newTaskForm">
+    {% for user in availableUsers %}
+    <option value={{user.pk}}>{{user.name}}</option>
+    {% endfor %}
+  </select>
   <input type="submit" value="Add task" name="addTask">
 </form>

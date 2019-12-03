@@ -488,6 +488,7 @@ class SprintBacklogView(generic.View):
         #allow user to choose which sprint they want to view and then render the correct sprint w tasks & pbi
         user = request.user
         project = get_object_or_404(Project, pk=pk)
+        latestSprint = project.getLatestSprint()
 
         #possible methods of posting
         #getting a sprint sprint number
@@ -497,7 +498,6 @@ class SprintBacklogView(generic.View):
             sprint = get_object_or_404(Sprint, pk=sprint_id)
             return self.renderSprint(request, sprint, project)
         if request.POST.get('sprint_action') != None:
-            latestSprint = project.getLatestSprint()
             if latestSprint == None or latestSprint.status == 'C':
                 return self.createNewSprint(project)
             else:
@@ -507,9 +507,24 @@ class SprintBacklogView(generic.View):
                 elif latestSprint.status =='IP':
                     project.endCurrentSprint()
                     return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+
+        #what developers can do for tasks in pbi
         if request.POST.get('add_task') != None:
             pbi_id = request.POST.get('pbi_id')
             return HttpResponseRedirect(reverse('backtrack:new_task', args=(pbi_id,)))
+        if request.POST.get('delete_task') != None:
+            return self.deleteTask(request, latestSprint)
+        if request.POST.get('modify_task') != None:
+            return self.modifyTask(request, pk)
+
+    def deleteTask(self, request, latestSprint):
+        task_id = request.POST.get('task_id')
+        Task.objects.get(pk=task_id).delete()
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+
+    def modifyTask(self, request, pk):
+        task_id = request.POST.get('task_id')
+        return HttpResponseRedirect(reverse('backtrack:modify_task', args=(task_id,)))
 
     def createNewSprint(self, project):
         newSprint = project.createNewSprint()
@@ -564,25 +579,12 @@ class NewTaskView(generic.View):
             return HttpResponseRedirect(reverse('login'))
 
     def post(self, request, pk):
-        if 'modifyTask' in self.request.POST:
-            return self.modifyTask(request, pk)
-        if 'deleteTask' in self.request.POST:
-            return self.deleteTask(request, pk)
-        if 'addTask' in self.request.POST:
+        if 'addTask' in request.POST:
             return self.addTask(request, pk)
         else:
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
-
-    def deleteTask(self, request, pk):
-        task_id = request.POST.get('task')
-        Task.objects.get(pk=task_id).delete()
-        return HttpResponseRedirect(reverse('backtrack:new_task', args=(pk,)))
-
-    def modifyTask(self, request, pk):
-        task_id = request.POST.get('task')
-        return HttpResponseRedirect(reverse('backtrack:modify_task', args=(task_id,)))
 
     def addTask(self, request, pk):
         pbi = get_object_or_404(ProductBacklogItem, pk=pk)
@@ -591,6 +593,7 @@ class NewTaskView(generic.View):
             newTask = form.save(commit=False)
             newTask.pbi = pbi
             newTask.status = 'NS'
+            newTask.assignment = get_object_or_404(User, pk=request.POST.get('assignment'))
             newTask.save()
             return HttpResponseRedirect(reverse('backtrack:new_task', args=(pk,)))
         else:
@@ -631,13 +634,6 @@ class ModifyTaskView(generic.View):
         if 'modifyTask' in self.request.POST:
             return self.modifyTask(request, pk)
 
-    #check to make sure some user is assigned
-    def deleteUserFromTask(self, request, pk):
-        user_id = request.POST.get('user')
-        task = get_object_or_404(Task, pk=pk)
-        task.assignment.remove(get_object_or_404(User, pk=user_id))
-        return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))
-
     #check to make sure that some user is assigned
     def modifyTask(self, request, pk):
         print(request.POST)
@@ -646,5 +642,6 @@ class ModifyTaskView(generic.View):
         task.desc = request.POST.get('desc')
         task.burndown = request.POST.get('burndown')
         task.status = request.POST.get('status')
+        task.assignment = get_object_or_404(User, pk=request.POST.get('assignment'))
         task.save()
         return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))
