@@ -1,4 +1,8 @@
 .PBIinfo {
+  border: 2px solid gray;
+}
+
+.sprintPBIcontent{
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -8,4 +12,10 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.sprint_stats{
+  border-collapse: collapse;
+  margin: 10px;
+  margin-left: 0px;
 }

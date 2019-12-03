@@ -504,10 +504,19 @@ class SprintBacklogView(generic.View):
             return self.deleteTask(request, latestSprint)
         if request.POST.get('modify_task') != None:
             return self.modifyTask(request, pk)
+        if request.POST.get('remove_pbi') != None:
+            return self.removePBI(request, latestSprint)
 
     def deleteTask(self, request, latestSprint):
         task_id = request.POST.get('task_id')
         Task.objects.get(pk=task_id).delete()
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+
+    def removePBI(self, request, latestSprint):
+        pbi_id = request.POST.get('pbi_id')
+        pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+        pbi.sprint = None;
+        pbi.save()
         return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
 
     def modifyTask(self, request, pk):

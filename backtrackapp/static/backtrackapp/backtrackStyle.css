@@ -11,6 +11,7 @@ border-style: solid;
 border-color: lightgrey;
 padding-left: 5px;
 padding-right: 5px;
+cursor: pointer;
 }
 
 a {

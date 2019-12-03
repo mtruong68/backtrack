@@ -100,6 +100,31 @@ class Sprint(models.Model):
     def __str__(self):
         return str(self.number)
 
+    def totalEstimatedEffort(self):
+        effort = 0
+        pbis = self.productbacklogitem_set.all()
+
+        for pbi in pbis:
+            tasks = pbi.task_set.all()
+            for task in tasks:
+                effort += task.estimate
+
+        return effort
+
+    def totalBurndown(self):
+        burndown = 0
+        pbis = self.productbacklogitem_set.all()
+
+        for pbi in pbis:
+            tasks = pbi.task_set.all()
+            for task in tasks:
+                burndown += task.burndown
+
+        return burndown
+
+    def totalEffortRemaining(self):
+        return self.totalEstimatedEffort() - self.totalBurndown()
+
 
 
 
@@ -140,3 +165,6 @@ class Task(models.Model):
 
     def __str__(self):
         return self.name
+
+    def remainingEffort(self):
+        return self.estimate-self.burndown

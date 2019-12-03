@@ -2,14 +2,10 @@
 Built with Python v 3.5.2 and Django 2.2.6
 
 ## current todo
-* add sprint timing functionality, figure out what to do if a project has no sprints yet
-* prevent users who are not product owners from adding pbi
-
-* clean up the code!!! clean up task/pbi form
-* figure out the many-to-many manager thing
-
-* allow deletion of project
-* allow modification of project (can add or delete users on dev team/scrum master)
+* permissions for adding tasks/pbi
+* figure out how to show capacity on sprint
+* allow only devs to do things on sprint
+* change product owner to look like sprint backlog
 
 * ***WRITE TESTS***
 * deploy server to heroku or some other host
