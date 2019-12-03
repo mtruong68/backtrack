@@ -48,18 +48,9 @@
         <div>PBI: <input type="text" value="{{task.name|escape}}" name='name'></div>
         {% endautoescape %}
 
-        <div>Current Devs on Task:</div>
         <div>
-          {% for user in task.assignment.all %}
-          {{user.name}}
-          <input type="hidden" name="user" value={{user.id}}>
-          <input type="submit" value="Delete Dev from Task" name="deleteUser">
-          {% endfor %}
-        </div>
-
-        <div>
-          <div> Add Dev to Task: </div>
-          <select name="assignment" form="modTaskForm" multiple>
+          <div> Assign Developer to Task: </div>
+          <select name="assignment" form="modTaskForm">
             {% for user in availableUsers %}
             <option value={{user.pk}}>{{user.name}}</option>
             {% endfor %}

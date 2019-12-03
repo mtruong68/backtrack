@@ -5,87 +5,87 @@
 {% block content %}
 
 <div>
-<span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
-<span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>
+  <span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
+  <span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>
 </div>
 
 <div class="tabContent">
-<a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
-<div class="contentTitle">Product Backlog</div><p>
+  <a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
+  <div class="contentTitle">Product Backlog</div><p>
+
+
+    <div class="divider"></div>
+    <div class="columnView">
+      <div class="contentTitle">All PBIs</div><p>
+        <form method="POST">
+          {% csrf_token %}
+          <table class="displayTable">
+            <tr class="heading">
+              <td class="displayTableCell">Sprint</td>
+              <td class="displayTableCell">Name</td>
+              <td class="displayTableCell">Description</td>
+              <td class="displayTableCell">Priority</td>
+              <td class="displayTableCell">Storypoints</td>
+              <td class="displayTableCell">Cumulative Storypoints</td>
+              <td class="displayTableCell">Status</td>
+            </tr>
+            {% for el in pbi_cum_points_list %}
+            <tr>
+              <td class="displayTableCell">{{el.pbi.sprint}}</td>
+              <td class="displayTableCell">{{el.pbi.name}}</td>
+              <td class="displayTableCell">{{el.pbi.desc}}</td>
+              <td class="displayTableCell">{{el.pbi.priority}}</td>
+              <td class="displayTableCell">{{el.pbi.storypoints}}</td>
+              <td class="displayTableCell">{{el.cum_points}}</td>
+              <td class="displayTableCell">{{el.pbi.get_status_display}}</td>
+              <td>
+                <form method="POST">
+                  {% csrf_token %}
+                  <input type="hidden" name="pbi_id" value="{{el.pbi.id}}">
+                  <input type="submit" value="Add to Sprint" name="addToSprint"><br>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </table>
+        </form>
+      </div>
 
 
 
 
 
-<div class="divider"></div>
-<div class="columnView">
-<div class="contentTitle">All PBIs</div><p>
-<form method="POST">
-{% csrf_token %}
-<table class="displayTable">
-<tr class="heading">
-<td class="displayTableCell">Sprint</td>
-<td class="displayTableCell">Name</td>
-<td class="displayTableCell">Description</td>
-<td class="displayTableCell">Priority</td>
-<td class="displayTableCell">Storypoints</td>
-<td class="displayTableCell">Cumulative Storypoints</td>
-<td class="displayTableCell">Status</td>
-</tr>
-{% for el in pbi_cum_points_list %}
-<tr>
-<td class="displayTableCell">{{el.pbi.sprint}}</td>
-<td class="displayTableCell">{{el.pbi.name}}</td>
-<td class="displayTableCell">{{el.pbi.desc}}</td>
-<td class="displayTableCell">{{el.pbi.priority}}</td>
-<td class="displayTableCell">{{el.pbi.storypoints}}</td>
-<td class="displayTableCell">{{el.cum_points}}</td>
-<td class="displayTableCell">{{el.pbi.get_status_display}}</td>
-<td>
-<input type="hidden" name="pbi" value="{{el.pbi.id}}">
-<input type="submit" value="Add to Sprint" name="addToSprint"><br>
-</td>
-</tr>
-{% endfor %}
-</table>
-</form>
-</div>
+      <div class="columnView">
+        <div class="contentTitle">PBIs In Progress</div><p>
+          <table class="displayTable">
+            <tr class="heading">
+              <td class="displayTableCell">Sprint</td>
+              <td class="displayTableCell">Name</td>
+              <td class="displayTableCell">Description</td>
+              <td class="displayTableCell">Priority</td>
+              <td class="displayTableCell">Storypoints</td>
+              <td class="displayTableCell">Cumulative Storypoints</td>
+            </tr>
+            {% for el in pbi_cum_points_list %}
+            {% if el.pbi.status == 'IP' %}
+            <tr>
+              <td class="displayTableCell">{{el.pbi.sprint}}</td>
+              <td class="displayTableCell">{{el.pbi.name}}</td>
+              <td class="displayTableCell">{{el.pbi.desc}}</td>
+              <td class="displayTableCell">{{el.pbi.priority}}</td>
+              <td class="displayTableCell">{{el.pbi.storypoints}}</td>
+              <td class="displayTableCell">{{el.cum_points}}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </table>
+        </div>
+        <div class="divider"></div>
 
 
 
 
 
-<div class="columnView">
-<div class="contentTitle">PBIs In Progress</div><p>
-<table class="displayTable">
-<tr class="heading">
-<td class="displayTableCell">Sprint</td>
-<td class="displayTableCell">Name</td>
-<td class="displayTableCell">Description</td>
-<td class="displayTableCell">Priority</td>
-<td class="displayTableCell">Storypoints</td>
-<td class="displayTableCell">Cumulative Storypoints</td>
-</tr>
-{% for el in pbi_cum_points_list %}
-{% if el.pbi.status == 'IP' %}
-<tr>
-<td class="displayTableCell">{{el.pbi.sprint}}</td>
-<td class="displayTableCell">{{el.pbi.name}}</td>
-<td class="displayTableCell">{{el.pbi.desc}}</td>
-<td class="displayTableCell">{{el.pbi.priority}}</td>
-<td class="displayTableCell">{{el.pbi.storypoints}}</td>
-<td class="displayTableCell">{{el.cum_points}}</td>
-</tr>
-{% endif %}
-{% endfor %}
-</table>
-</div>
-<div class="divider"></div>
+      </div>
 
-
-
-
-
-</div>
-
-{% endblock %}
+      {% endblock %}

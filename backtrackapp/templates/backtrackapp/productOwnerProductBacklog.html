@@ -38,10 +38,14 @@
               <td class="displayTableCell">{{el.cum_points}}</td>
               <td class="displayTableCell">{{el.pbi.get_status_display}}</td>
               <td>
-                <div class="modifyButton"><a href="{% url 'backtrack:modify_PBI' el.pbi.id %}">Modify</a><br></div>
-                <input type="submit" value="Delete" name="deletePBI"><br>
-                <input type="text" placeholder="Number of Child PBI" name="numOfChildPBI"><br>
-                <input type="submit" value="Split" name="splitPBI">
+                <form method="POST">
+                  {% csrf_token %}
+                    <input type="hidden" name="pbi_id" value={{el.pbi.pk}}>
+                    <input type="submit" value="Modify" name="modifyPBI">
+                    <input type="submit" value="Delete" name="deletePBI"><br>
+                    <input type="text" placeholder="Number of Child PBI" name="numOfChildPBI"><br>
+                    <input type="submit" value="Split" name="splitPBI">
+                </form>
               </td>
             </tr>
             {% endfor %}

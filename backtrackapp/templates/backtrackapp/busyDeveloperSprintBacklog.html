@@ -1,96 +1,83 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %} Busy Developer Sprint Backlog {% endblock %}
+{% block title %}Sprint Backlog{% endblock %}
 {% block content %}
 
 <div>
-<span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
-<span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>
+  <span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
+  <span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>
 </div>
 
 <div class="tabContent">
-<a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
-<div class="contentTitle">Sprint Backlog</div><p>
+  <a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
+  <div class="contentTitle">Sprint Backlog</div><p>
+
+    <div id="pastSprints">
+      {% if project.sprint_set.count > 0 %}
+      <form method="POST">
+        {% csrf_token %}
+        {% for sprint in project.sprint_set.all %}
+        <button class="actionButton" name="sprint_id" type="submit" value="{{sprint.id}}"">
+          <a>
+            {% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
+            Sprint {{sprint}}
+          </a>
+        </button>
+        {% endfor %}
+      </form>
+      {% else %}
+      <span class="contentTitle">No sprint is created in this project</span>
+      {% endif %}
+    </div>
+
+  <div>
+    <span class="contentTitle">Sprint {{sprint.number}}</span><br>
+    <span>Tasks in the selected sprint</span><br>
 
 
+      <table class="displayTable">
+        <tr>
+          <td class="displayTableCell"><b>Parent PBI</b></td>
+          <td class="displayTableCell"><b>Description</b></td>
+          <td class="displayTableCell"><b>Status</b></td>
+          <td class="displayTableCell"><b>Developer Assigned</b></td>
+          <td class="displayTableCell"><b>Estimated Effort</b></td>
+          <td class="displayTableCell"><b>Burndown</b></td>
+          <td class="displayTableCell"><b>Remaining Effort</b></td>
+        </tr>
 
+        {% for sprintPBI in sprintPBI_set %}
 
+          <td class="displayTableCell">{{ sprintPBI.name }}
+          <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="pbi_id" value={{sprintPBI.id}}>
+            <input type="submit" value="Add Task" name="add_task">
+          </form>
+          </td>
 
-<div id="pastSprints">
-{% if project.sprint_set.count > 0 %}
-<form method="POST">
-{% csrf_token %}
-{% for sprint in project.sprint_set.all %}
-<button class="actionButton" name="sprintNumber" type="submit" value="{{sprint.id}}"">
-<a>
-{% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
-Sprint {{sprint}}
-</a>
-</button>
-{% endfor %}
-</form>
-{% else %}
-<span class="contentTitle">No sprint is created in this project</span><p>
-{% endif %}
-<p>
-</div>
+          {% for task in sprintPBI.task_set.all %}
+          <tr>
+            <td class="displayTableCell">{{ task.desc }}</td>
+            <td class="displayTableCell">{{ task.get_status_display }}</td>
+            <td class="displayTableCell">{{ task.assignment }}</td>
+            <td class="displayTableCell">{{ task.estimate }}</td>
+            <td class="displayTableCell">{{ task.burndown }}</td>
+            <td class="displayTableCell"></td>
+          </tr>
+          {% endfor %}
 
-<p>
-<span class="actionButton"><a href="{% url 'backtrack:new_sprint' project.id %}">Add New Sprint</a></span>
-
-<p>
-
-<div>
-{% if tasksInAllSprintPBIs %}
-<span class="contentTitle">Sprint {{sprint}}</span><br>
-<span>Tasks in the selected sprint</span><br>
-<form method="POST">
-{% csrf_token %}
-<table class="displayTable">
-<tr>
-<td class="displayTableCell">Parent PBI</td>
-<td class="displayTableCell">Description</td>
-<td class="displayTableCell">Status</td>
-<td class="displayTableCell">Developer(s) In Charge</td>
-<td class="displayTableCell">Estimated Effort</td>
-<td class="displayTableCell">Burndown</td>
-<td class="displayTableCell">Remaining Effort</td>
-</tr>
-{% for task in tasksInAllSprintPBIs %}
-<tr>
-<td class="displayTableCell">{{ task.pbi }}</td>
-<td class="displayTableCell">{{ task.desc }}</td>
-<td class="displayTableCell">{{ task.get_status_display }}</td>
-<td class="displayTableCell">{{ task.assignment }}</td>
-<td class="displayTableCell">{{ task.estimate }}</td>
-<td class="displayTableCell">{{ task.burndown }}</td>
-<td class="displayTableCell"></td>
-<td>
-<input type="hidden" name="task" value="{{task.id}}">
-<button><a href="{% url 'backtrack:modify_task' task.id %}">Modify</a></button><br>
-<input type="submit" value="Delete" name="deletetask"><br>
-</td>
-</tr>
-{% endfor %}
-<tr>
-<td class="displayTableCell" colspan="4">Total</td>
-<td class="displayTableCell"></td>
-<td class="displayTableCell"></td>
-<td class="displayTableCell"></td>
-</tr>
-</table>
-</form>
-<p>
-<span class="actionButton"><a href="{% url 'backtrack:new_task' sprint.id %}">Add New Task</a></span>
-{% else %}
-<span class="contentTitle">No PBIs/tasks in the selected sprint</span><p>
-{% endif %}
-</div>
-
-
-
-
+        {% endfor %}
+        <tr>
+          <td class="displayTableCell" colspan="4">Total</td>
+          <td class="displayTableCell"></td>
+          <td class="displayTableCell"></td>
+          <td class="displayTableCell"></td>
+        </tr>
+      </table>
+    <p>
+    </div>
 
 </div>
 

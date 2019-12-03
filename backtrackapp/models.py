@@ -136,7 +136,7 @@ class Task(models.Model):
     burndown = models.PositiveIntegerField(default=0)
     estimate = models.PositiveIntegerField()
     pbi = models.ForeignKey(ProductBacklogItem, on_delete = models.CASCADE)
-    assignment = models.ManyToManyField(User)
+    assignment = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name

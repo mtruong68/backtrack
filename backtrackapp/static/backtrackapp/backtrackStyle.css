@@ -148,13 +148,13 @@ width: 5%;
 
 table.displayTable {
 border-collapse: collapse;
-font-size: 10px;
 width: 100%;
 }
 
-td.displayTableCell {
+.displayTableCell {
 border: 2px solid lightgrey;
 text-align: center;
+font-size: 13px;
 }
 
 .modifyButton{
