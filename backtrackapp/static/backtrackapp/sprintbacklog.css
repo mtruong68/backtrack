@@ -1,0 +1,11 @@
+.PBIinfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.taskModButtons{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
