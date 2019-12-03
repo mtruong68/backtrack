@@ -6,6 +6,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.sprintPBIcontentForm{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  font-size: 12px;
 }
 
 .taskModButtons{
@@ -18,4 +28,17 @@
   border-collapse: collapse;
   margin: 10px;
   margin-left: 0px;
+}
+
+.sprintActionTitle{
+  padding-top: 25px;
+  display: flex;
+  flex-direction: horizontal;
+  align-items: baseline;
+}
+
+.sprintAction{
+  margin-left: 20px;
+  border-radius: 12px;
+  cursor:pointer;
 }

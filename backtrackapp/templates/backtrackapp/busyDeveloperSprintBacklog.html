@@ -34,7 +34,24 @@
     </div>
 
   <div>
+    <div class="sprintActionTitle">
+
     <span class="contentTitle">Sprint {{sprint.number}}</span><br>
+    <span>
+      <form method="POST">
+        {% csrf_token %}
+        <button class="sprintAction" name="sprint_action" type="submit">
+        {% if status == 1 %}
+          <p>Create New Sprint</p>
+        {% elif status == 2 %}
+          <p>Start Sprint</p>
+        {% elif status == 3 %}
+          <p>End Sprint</p>
+        {% endif %}
+        </button>
+      </form>
+    </span>
+    </div>
 
     <table class="sprint_stats">
       <tr>
@@ -68,13 +85,19 @@
         {% for sprintPBI in sprintPBI_set %}
         <tr>
           <td class="PBIinfo" rowspan="{{sprintPBI.task_set.count}}">
-            <form method="POST" class="sprintPBIcontent">
-              {{ sprintPBI.name }}
-              {% csrf_token %}
-              <input type="hidden" name="pbi_id" value={{sprintPBI.id}}>
-              <input type="submit" value="Add Task to PBI" name="add_task">
-              <input type="submit" value="Remove PBI from Sprint" name="remove_pbi">
-            </form>
+            <div class="sprintPBIContent">
+              <b>{{ sprintPBI.name }}</b>
+              <form method="POST" class="sprintPBIcontentForm">
+                {% csrf_token %}
+                <input type="hidden" name="pbi_id" value={{sprintPBI.id}}>
+                <input type="submit" value="Add Task to PBI" name="add_task">
+                <input type="submit" value="Remove PBI from Sprint" name="remove_pbi">
+              </form>
+
+              <div>PBI Estimated Effort: {{sprintPBI.totalEstimatedEffort}}</div>
+              <div>PBI Burndown: {{sprintPBI.totalBurndown}}</div>
+              <div>PBI Total Remaining Effort: {{sprintPBI.totalEffortRemaining}}</div>
+            </div>
           </td>
 
           {% for task in sprintPBI.task_set.all %}
@@ -97,7 +120,7 @@
           {% endfor %}
         {% endfor %}
         </table>
-        
+
     </div>
 
 </div>

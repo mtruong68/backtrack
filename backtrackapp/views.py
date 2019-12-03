@@ -39,9 +39,6 @@ def is_productowner(user, project_pk):
     return False
 
 
-
-
-
 #Sees if user has permission to add/modify/delete Task
 #True if user is on the dev team and is their current project
 def is_dev(user, project_pk):
@@ -54,18 +51,12 @@ def is_dev(user, project_pk):
     return False
 
 
-
-
-
 #Sees if the user is the scrum master (manager)
-#True if user is scrum master and is their current project
+#True if user is scrum master
 def is_scrummaster(user):
     if user.role == 'M':
         return True
     return False
-
-
-
 
 
 class SignUpView(generic.CreateView):
@@ -252,8 +243,15 @@ class ProductBacklogView(generic.View):
             return HttpResponse("Did not work.")
 
     def addToSprint(self, request, pbi_id, project_id):
+        if is_dev(request.user, project_id) == False:
+            return HttpResponse("Only developers can add to the sprint backlog")
+
         project = get_object_or_404(Project, pk=project_id)
         latestSprint = project.getLatestSprint()
+
+        if latestSprint.status != 'IP':
+            return HttpResponse("You must start the sprint before adding PBIs to the current sprint")
+
         pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
         pbi.sprint = latestSprint
         pbi.save()

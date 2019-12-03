@@ -128,9 +128,6 @@ class Sprint(models.Model):
 
 
 
-
-
-
 class ProductBacklogItem(models.Model):
     STATUS = (
         ('NS', 'Not Started'),
@@ -147,6 +144,23 @@ class ProductBacklogItem(models.Model):
 
     def __str__(self):
         return self.name
+
+    def totalBurndown(self):
+        burndown = 0
+        tasks = self.task_set.all()
+        for task in tasks:
+            burndown += task.burndown
+        return burndown
+
+    def totalEstimatedEffort(self):
+        effort = 0
+        tasks = self.task_set.all()
+        for task in tasks:
+            effort += task.estimate
+        return effort
+
+    def totalEffortRemaining(self):
+        return self.totalEstimatedEffort() - self.totalBurndown()
 
 
 class Task(models.Model):
