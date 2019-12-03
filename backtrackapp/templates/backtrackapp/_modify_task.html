@@ -31,6 +31,18 @@
     padding: 10px;
   }
 
+  .linkbutton {
+    border: 1px #b3b3b3 solid;
+    background-color: #dbdbdb;
+    color: black;
+    font-size: 14px;
+    padding: 2px;
+  }
+
+  a {
+    text-decoration: None;
+  }
+
   body {
     font-family: "Trebuchet MS", Helvetica, sans-serif;
   }
@@ -44,12 +56,14 @@
         {% csrf_token %}
 
         {% autoescape off %}
-        <div>Task Title: <input type="text" value="{{task.name|escape}}" name='name'></div>
-        <div>PBI: <input type="text" value="{{task.name|escape}}" name='name'></div>
+        <div>Task Name: <input type="text" value="{{task.name|escape}}" name='name'></div>
+        <div>Task Description:
+        <input type="text" value="{{task.desc|escape}}" name='desc'>
+        </div>
         {% endautoescape %}
 
         <div>
-          <div> Assign Developer to Task: </div>
+          Assign Developer to Task:
           <select name="assignment" form="modTaskForm">
             {% for user in availableUsers %}
             <option value={{user.pk}}>{{user.name}}</option>
@@ -65,18 +79,13 @@
           </select>
         </div>
 
-        <div>Description: </div>
-        <textarea rows="8" cols="80" value={{task.desc}} name='desc'></textarea>
-        <div>PBI: <input type="text" value={{task.name}} name='name'></div>
         <div>Burndown: <input type="number" value={{task.burndown}} name='burndown'></div>
 
-
-
-        <button>Cancel</button>
+        <a class="linkbutton" href="{% url 'backtrack:project_sb' task.pbi.sprint.id %}">Cancel</a>
         <input type="submit" value="Save" name="modifyTask">
       </form>
     </div>
-    <a href="{% url 'backtrack:new_task' task.pbi.id %}">Back to PBI Task View</a>
-    <a href="{% url 'backtrack:project_sb' task.pbi.sprint.id %}">Back to Sprint Backlog</a>
+    <a class="linkbutton" href="{% url 'backtrack:new_task' task.pbi.id %}">Back to PBI Task View</a>
+    <a class="linkbutton" href="{% url 'backtrack:project_sb' task.pbi.sprint.id %}">Back to Sprint Backlog</a>
   </div>
 </body>

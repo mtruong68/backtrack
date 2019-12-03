@@ -463,21 +463,9 @@ class SprintBacklogView(generic.View):
             if has_access(user, pk):
                 project = get_object_or_404(Project, pk=pk)
                 sprint = Sprint.objects.filter(project=project).all()
-
                 latestSprint = project.getLatestSprint()
-                if latestSprint == None or latestSprint.status == 'C':
-                    status = 1
-                elif latestSprint.status == 'NS':
-                    status = 2
-                elif latestSprint.status == 'IP':
-                    status = 3
 
-                if is_scrummaster(user):
-                    return render(request, 'backtrackapp/scrumMasterSprintBacklog.html', {'sprint':sprint, 'project': project})
-                elif is_productowner(user, project.pk):
-                    return render(request, 'backtrackapp/productOwnerSprintBacklog.html', {'sprint':sprint, 'project': project, 'status': status})
-                else:
-                    return render(request, 'backtrackapp/busyDeveloperSprintBacklog.html', {'sprint':sprint, 'project': project})
+                return self.renderSprint(request, latestSprint, project)
 
             else:
                 return Http404("You do not have access to this project")
