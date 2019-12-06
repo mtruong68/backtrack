@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 
+from html import unescape
+
 from .forms import NewProjectForm, NewPBIForm, NewTaskForm, ProjectTeamForm, CustomUserCreationForm
 from .models import Project, ProductBacklogItem, Sprint, User, ProjectTeam, Task
 
@@ -37,9 +39,6 @@ def is_productowner(user, project_pk):
     return False
 
 
-
-
-
 #Sees if user has permission to add/modify/delete Task
 #True if user is on the dev team and is their current project
 def is_dev(user, project_pk):
@@ -52,18 +51,12 @@ def is_dev(user, project_pk):
     return False
 
 
-
-
-
 #Sees if the user is the scrum master (manager)
-#True if user is scrum master and is their current project
+#True if user is scrum master
 def is_scrummaster(user):
     if user.role == 'M':
         return True
     return False
-
-
-
 
 
 class SignUpView(generic.CreateView):
@@ -72,13 +65,6 @@ class SignUpView(generic.CreateView):
     template_name = 'signup.html'
 
 
-
-
-
-#We need to create different index views based on the type of role the user has
-#if no current project or is the product owner, show the product backlog first
-#if a developer, show the task view
-#do the manager stuff later
 class IndexView(generic.View):
     def get(self, request):
         user = request.user
@@ -220,7 +206,7 @@ class ProductBacklogView(generic.View):
                 #get the latest sprint and show the sprint backlog of that sprint
                 sprints = project.sprint_set.all()
                 if len(sprints) > 0:
-                    latestSprint = sprints.latest('start_date')
+                    latestSprint = sprints.latest('creation_time')
                 else:
                     latestSprint = None
 
@@ -238,35 +224,41 @@ class ProductBacklogView(generic.View):
             return HttpResponseRedirect(reverse('login'))
 
     def post(self, request, pk):
-        if 'addToSprint' in self.request.POST:
-            return self.addToSprint(request, pk)
-        if 'createNewPBI' in self.request.POST:
-            return self.createNewPBI(request, pk)
-        if 'deletePBI' in self.request.POST:
-            return self.deletePBI(request, pk)
-        if 'splitPBI' in self.request.POST:
-            return self.splitPBI(request, pk)
-        if 'modifyPBI' in self.request.POST:
-            pbi_id = request.POST.get('pbi')
+        if request.POST.get('pbi_id') != None:
+            pbi_id = int(request.POST.get('pbi_id'))
+
+        if 'addToSprint' in request.POST:
+            return self.addToSprint(request, pbi_id, pk)
+        if 'createNewPBI' in request.POST:
+            return self.createNewPBI(request, pbi_id)
+        if 'deletePBI' in request.POST:
+            return self.deletePBI(request, pbi_id)
+        if 'splitPBI' in request.POST:
+            return self.splitPBI(request, pbi_id)
+        if 'modifyPBI' in request.POST:
             return HttpResponseRedirect(reverse('backtrack:modify_PBI', args=(pbi_id,)))
         else:
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
 
-    def addToSprint(self, request, pk):
-        project = get_object_or_404(Project, pk=pk)
-        sprints = project.sprint_set.all()
-        latestSprint = sprints.latest('start_date')
-        pbi_id = request.POST.get('pbi')
+    def addToSprint(self, request, pbi_id, project_id):
+        if is_dev(request.user, project_id) == False:
+            return HttpResponse("Only developers can add to the sprint backlog")
+
+        project = get_object_or_404(Project, pk=project_id)
+        latestSprint = project.getLatestSprint()
+
+        if latestSprint.status != 'IP':
+            return HttpResponse("You must start the sprint before adding PBIs to the current sprint")
+
         pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
         pbi.sprint = latestSprint
         pbi.save()
-        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(project_id,)))
 
     def deletePBI(self, request, pk):
-        pbi_id = request.POST.get('pbi')
-        pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+        pbi = get_object_or_404(ProductBacklogItem, pk=pk)
         self.updatePrioritiesDelete(pk, pbi.priority)
         pbi.delete()
         return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
@@ -375,7 +367,18 @@ class ModifyPBIView(generic.View):
         if user.is_authenticated:
             pbi = get_object_or_404(ProductBacklogItem, pk=pk)
             if has_access(user, pbi.project_id):
-                context = {'form': NewPBIForm(initial={'pbi': pbi}), 'pbi': pbi}
+
+                choices = [
+                    {'value': 'NS', 'status':'Not Started'},
+                    {'value': 'IP', 'status':'In Progress'},
+                    {'value': 'C', 'status': 'Complete'}
+                ]
+
+                for choice in choices:
+                    if choice['value'] == pbi.status:
+                        choice['selected'] = "selected"
+
+                context = {'form': NewPBIForm(initial={'pbi': pbi}), 'pbi': pbi, 'choices': choices}
                 return render(request, 'backtrackapp/_modify_PBI.html', context)
             else:
                 return Http404("You do not have access to this project.")
@@ -403,6 +406,7 @@ class ModifyPBIView(generic.View):
             pbi.save()
             return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pbi.project.pk,)))
 
+
     def checkPriority(self, request, pk):
         pbi_id = request.POST.get('pbi')
         pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
@@ -425,7 +429,7 @@ class ModifyPBIView(generic.View):
             return
 
         pbis = pbi.project.productbacklogitem_set.all()
-        print(pbis)
+
         if old_priority < new_priority:
             for i in pbis:
                 if i.priority <= new_priority and i.priority > old_priority:
@@ -457,14 +461,9 @@ class SprintBacklogView(generic.View):
             if has_access(user, pk):
                 project = get_object_or_404(Project, pk=pk)
                 sprint = Sprint.objects.filter(project=project).all()
-                pbis = ProductBacklogItem.objects.filter(project=project).all()
+                latestSprint = project.getLatestSprint()
 
-                if is_scrummaster(user):
-                    return render(request, 'backtrackapp/scrumMasterSprintBacklog.html', {'sprint':sprint, 'project': project})
-                elif is_productowner(user, project.pk):
-                    return render(request, 'backtrackapp/productOwnerSprintBacklog.html', {'sprint':sprint, 'project': project})
-                else:
-                    return render(request, 'backtrackapp/busyDeveloperSprintBacklog.html', {'sprint':sprint, 'project': project})
+                return self.renderSprint(request, latestSprint, project)
 
             else:
                 return Http404("You do not have access to this project")
@@ -472,17 +471,82 @@ class SprintBacklogView(generic.View):
             return HttpResponseRedirect(reverse('login'))
 
     def post(self, request, pk):
+        #allow user to choose which sprint they want to view and then render the correct sprint w tasks & pbi
         user = request.user
         project = get_object_or_404(Project, pk=pk)
-        sprintRequest = request.POST.get('sprintNumber')
-        sprint = get_object_or_404(Sprint, pk=sprintRequest)
+        latestSprint = project.getLatestSprint()
+
+        #possible methods of posting
+        #getting a sprint sprint number
+
+        if request.POST.get('sprint_id') != None:
+            sprint_id = request.POST.get('sprint_id')
+            sprint = get_object_or_404(Sprint, pk=sprint_id)
+            return self.renderSprint(request, sprint, project)
+        if request.POST.get('sprint_action') != None:
+            if latestSprint == None or latestSprint.status == 'C':
+                return self.createNewSprint(project)
+            else:
+                if latestSprint.status == 'NS':
+                    project.startCurrentSprint()
+                    return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+                elif latestSprint.status =='IP':
+                    project.endCurrentSprint()
+                    return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+
+        #what developers can do for tasks in pbi
+        if request.POST.get('add_task') != None:
+            pbi_id = request.POST.get('pbi_id')
+            return HttpResponseRedirect(reverse('backtrack:new_task', args=(pbi_id,)))
+        if request.POST.get('delete_task') != None:
+            return self.deleteTask(request, latestSprint)
+        if request.POST.get('modify_task') != None:
+            return self.modifyTask(request, pk)
+        if request.POST.get('remove_pbi') != None:
+            return self.removePBI(request, latestSprint)
+
+    def deleteTask(self, request, latestSprint):
+        task_id = request.POST.get('task_id')
+        Task.objects.get(pk=task_id).delete()
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+
+    def removePBI(self, request, latestSprint):
+        pbi_id = request.POST.get('pbi_id')
+        pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+        pbi.sprint = None;
+        pbi.save()
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+
+    def modifyTask(self, request, pk):
+        task_id = request.POST.get('task_id')
+        return HttpResponseRedirect(reverse('backtrack:modify_task', args=(task_id,)))
+
+    def createNewSprint(self, project):
+        newSprint = project.createNewSprint()
+        newSprint.save()
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(newSprint.pk,)))
+
+    def renderSprint(self, request, sprint, project):
+        user = request.user
+
         tasksInAllSprintPBIs = []
-        sprintPBI_set = ProductBacklogItem.objects.filter(project=project, sprint=sprint).all()
+
+        sprintPBI_set = ProductBacklogItem.objects.filter(sprint=sprint).all()
+
         for sprintPBI in sprintPBI_set:
             task_set = Task.objects.filter(pbi=sprintPBI).all()
             for task in task_set:
                 tasksInAllSprintPBIs.append(task)
-        context = {'sprint':sprint, 'project': project, 'tasksInAllSprintPBIs': tasksInAllSprintPBIs}
+
+        latestSprint = project.getLatestSprint()
+        if latestSprint == None or latestSprint.status == 'C':
+            status = 1
+        elif latestSprint.status == 'NS':
+            status = 2
+        else:
+            status = 3
+
+        context = {'sprint':sprint, 'project': project, 'sprintPBI_set': sprintPBI_set, 'status':status}
 
         if is_scrummaster(user):
             return render(request, 'backtrackapp/scrumMasterSprintBacklog.html', context)
@@ -494,14 +558,15 @@ class SprintBacklogView(generic.View):
 
 
 
-
 class NewTaskView(generic.View):
     def get(self, request, pk):
         user = request.user
         if user.is_authenticated:
             pbi = get_object_or_404(ProductBacklogItem, pk=pk)
             if has_access(user, pbi.project.pk):
-                context = {'form': NewTaskForm(initial={'pbi': pbi}), 'pbi': pbi}
+                availableUsers = ProjectTeam.objects.filter(project=pbi.project).first().dev_team.all()
+                context = {'form': NewTaskForm(initial={'pbi': pbi}),
+                'pbi': pbi, 'availableUsers': availableUsers}
                 return render(request, 'backtrackapp/_new_task.html', context)
             else:
                 return Http404("You do not have access to this project")
@@ -509,54 +574,37 @@ class NewTaskView(generic.View):
             return HttpResponseRedirect(reverse('login'))
 
     def post(self, request, pk):
-        if 'modifyTask' in self.request.POST:
-            return self.modifyTask(request, pk)
-        if 'deleteTask' in self.request.POST:
-            return self.deleteTask(request, pk)
-        if 'addTask' in self.request.POST:
+        if 'addTask' in request.POST:
             return self.addTask(request, pk)
         else:
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
 
-    def deleteTask(self, request, pk):
-        task_id = request.POST.get('task')
-        Task.objects.get(pk=task_id).delete()
-        return HttpResponseRedirect(reverse('backtrack:new_task', args=(pk,)))
-
-    def modifyTask(self, request, pk):
-        task_id = request.POST.get('task')
-        return HttpResponseRedirect(reverse('backtrack:modify_task', args=(task_id,)))
-
     def addTask(self, request, pk):
-        print(request.POST)
         pbi = get_object_or_404(ProductBacklogItem, pk=pk)
         form = NewTaskForm(request.POST, initial={"pbi":pbi})
         if form.is_valid():
             newTask = form.save(commit=False)
-            assignGroup = request.POST.getlist('assignment')
             newTask.pbi = pbi
+            newTask.status = 'NS'
+            newTask.assignment = get_object_or_404(User, pk=request.POST.get('assignment'))
             newTask.save()
-            for assign in assignGroup:
-                newTask.assignment.add(User.objects.get(pk=assign))
-                newTask.save()
             return HttpResponseRedirect(reverse('backtrack:new_task', args=(pk,)))
         else:
             #this is a stub method and needs to be changed
             print(form.errors)
             return HttpResponse("Did not work.")
 
-
-
-
-
 class ModifyTaskView(generic.View):
     def get(self, request, pk):
         user = request.user
         if user.is_authenticated:
             task = get_object_or_404(Task, pk=pk)
-            if has_access(user, task.pbi.project.pk):
+            project_id = task.pbi.project.pk
+            project = get_object_or_404(Project, pk=project_id)
+
+            if has_access(user, project_id):
                 choices = [
                     {'value': 'NS', 'status':'Not Started'},
                     {'value': 'IP', 'status':'In Progress'},
@@ -566,7 +614,8 @@ class ModifyTaskView(generic.View):
                     if choice['value'] == task.status:
                         choice['selected'] = "selected"
 
-                availableUsers = User.objects.all().difference(task.assignment.all())
+                availableUsers = ProjectTeam.objects.filter(project=project).first().dev_team.all()
+
                 context = {'task':task, 'choices': choices, 'availableUsers': availableUsers}
                 return render(request, 'backtrackapp/_modify_task.html', context)
             else:
@@ -580,13 +629,6 @@ class ModifyTaskView(generic.View):
         if 'modifyTask' in self.request.POST:
             return self.modifyTask(request, pk)
 
-    #check to make sure some user is assigned
-    def deleteUserFromTask(self, request, pk):
-        user_id = request.POST.get('user')
-        task = get_object_or_404(Task, pk=pk)
-        task.assignment.remove(get_object_or_404(User, pk=user_id))
-        return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))
-
     #check to make sure that some user is assigned
     def modifyTask(self, request, pk):
         print(request.POST)
@@ -595,10 +637,6 @@ class ModifyTaskView(generic.View):
         task.desc = request.POST.get('desc')
         task.burndown = request.POST.get('burndown')
         task.status = request.POST.get('status')
+        task.assignment = get_object_or_404(User, pk=request.POST.get('assignment'))
         task.save()
-        assignGroup = request.POST.getlist('assignment')
-        if assignGroup != None:
-            for assign in assignGroup:
-                task.assignment.add(User.objects.get(pk=assign))
-                task.save()
         return HttpResponseRedirect(reverse('backtrack:modify_task', args=(pk,)))

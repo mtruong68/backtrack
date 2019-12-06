@@ -2,23 +2,13 @@
 Built with Python v 3.5.2 and Django 2.2.6
 
 ## current todo
-* add sprint timing functionality, figure out what to do if a project has no sprints yet
-* change task view so that it looks good
-
-* create index views for users (devs and product owners)
-* prevent users from seeing product/sprint backlogs that they were not assigned to
-* prevent users who are not product owners from adding pbi
-
-* clean up the code!!! clean up task/pbi form
-* figure out the many-to-many manager thing
-
-* incorporate sprint things to project form
-* allow deletion of project
-* allow modification of project (can add or delete users on dev team/scrum master)
+* permissions for adding tasks/pbi
+* figure out how to show capacity on sprint
+* allow only devs to do things on sprint
+* change product owner to look like sprint backlog
 
 * ***WRITE TESTS***
 * deploy server to heroku or some other host
-* please someone... do some css magic on it... its so ugly rn
 
 To run locally on your machine:
 `$ python manage.py runserver`

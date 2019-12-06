@@ -34,7 +34,7 @@ class NewProjectForm(forms.ModelForm):
 class NewPBIForm(forms.ModelForm):
     class Meta:
         model = ProductBacklogItem
-        exclude = ['project', 'sprint']
+        exclude = ['project', 'sprint', 'status']
         labels = {
         "desc": "Description",
         "storypoints": "Story Points"
@@ -43,7 +43,7 @@ class NewPBIForm(forms.ModelForm):
 class NewTaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        exclude = ['pbi']
+        exclude = ['pbi', 'status', 'assignment']
         labels = {
         "desc": "Description",
         "assignment": "Assigned To"

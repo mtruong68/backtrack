@@ -1,11 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 import datetime
-
-
-
-
 
 class Project(models.Model):
     STATUS = (
@@ -22,8 +19,39 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+    def getLatestSprint(self):
+        sprints = self.sprint_set.all()
+        if len(sprints) == 0:
+            return None
+        else:
+            return sprints.order_by('-creation_time')[0]
 
+    def createNewSprint(self):
+        #if you have a current sprint that is in progress, do not allow creation of new sprint
+        latestSprint = self.getLatestSprint()
 
+        if latestSprint != None:
+            latestNumber = latestSprint.number + 1
+            if latestSprint.status != 'C':
+                return -1
+        else:
+            latestNumber = 1;
+
+        sprint = Sprint(number=latestNumber, project=self)
+        return sprint;
+
+    def startCurrentSprint(self):
+        latestSprint = self.getLatestSprint()
+        if latestSprint == None or latestSprint.status != 'NS':
+            return -1
+        else:
+            latestSprint.status = 'IP'
+        latestSprint.save()
+
+    def endCurrentSprint(self):
+        #get all the pbi from the current sprint set and set their sprint to none
+        #change status to complete
+        pass
 
 
 class User(AbstractUser):
@@ -64,8 +92,7 @@ class Sprint(models.Model):
         ('C', 'Complete'),
     )
     number = models.PositiveIntegerField()
-    start_date = models.DateTimeField(default=timezone.now)
-    end_date = models.DateTimeField(default=timezone.now)
+    creation_time = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=2, choices=STATUS, default='NS')
     totalCapacity = models.PositiveIntegerField(default=0)
     project = models.ForeignKey(Project, on_delete = models.CASCADE)
@@ -73,6 +100,30 @@ class Sprint(models.Model):
     def __str__(self):
         return str(self.number)
 
+    def totalEstimatedEffort(self):
+        effort = 0
+        pbis = self.productbacklogitem_set.all()
+
+        for pbi in pbis:
+            tasks = pbi.task_set.all()
+            for task in tasks:
+                effort += task.estimate
+
+        return effort
+
+    def totalBurndown(self):
+        burndown = 0
+        pbis = self.productbacklogitem_set.all()
+
+        for pbi in pbis:
+            tasks = pbi.task_set.all()
+            for task in tasks:
+                burndown += task.burndown
+
+        return burndown
+
+    def totalEffortRemaining(self):
+        return self.totalEstimatedEffort() - self.totalBurndown()
 
 
 
@@ -94,8 +145,22 @@ class ProductBacklogItem(models.Model):
     def __str__(self):
         return self.name
 
+    def totalBurndown(self):
+        burndown = 0
+        tasks = self.task_set.all()
+        for task in tasks:
+            burndown += task.burndown
+        return burndown
 
+    def totalEstimatedEffort(self):
+        effort = 0
+        tasks = self.task_set.all()
+        for task in tasks:
+            effort += task.estimate
+        return effort
 
+    def totalEffortRemaining(self):
+        return self.totalEstimatedEffort() - self.totalBurndown()
 
 
 class Task(models.Model):
@@ -110,7 +175,10 @@ class Task(models.Model):
     burndown = models.PositiveIntegerField(default=0)
     estimate = models.PositiveIntegerField()
     pbi = models.ForeignKey(ProductBacklogItem, on_delete = models.CASCADE)
-    assignment = models.ManyToManyField(User)
+    assignment = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name
+
+    def remainingEffort(self):
+        return self.estimate-self.burndown

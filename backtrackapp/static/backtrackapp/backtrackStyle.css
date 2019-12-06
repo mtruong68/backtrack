@@ -11,6 +11,7 @@ border-style: solid;
 border-color: lightgrey;
 padding-left: 5px;
 padding-right: 5px;
+cursor: pointer;
 }
 
 a {
@@ -74,8 +75,8 @@ font-weight: bold;
 }
 
 .helpFieldWrapper {
-font-size: 12px;
-color: lightgrey;
+font-size: 15px;
+color: #4a4a4a;
 font-weight: bold;
 }
 
@@ -148,13 +149,21 @@ width: 5%;
 
 table.displayTable {
 border-collapse: collapse;
-font-size: 10px;
 width: 100%;
 }
 
-td.displayTableCell {
+.displayTableCell {
 border: 2px solid lightgrey;
 text-align: center;
+font-size: 13px;
+}
+
+.modifyButton{
+  border: 2px solid lightgrey;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12px;
+  background-color: #ededed;
 }
 
 /* Sprint Backlog */
