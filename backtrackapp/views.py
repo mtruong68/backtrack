@@ -451,19 +451,21 @@ class ModifyPBIView(generic.View):
 
 
 
-
-
 #Views handling the client accessing the Sprint Backlog
 class SprintBacklogView(generic.View):
     def get(self, request, pk):
         user = request.user
+
         if user.is_authenticated:
             if has_access(user, pk):
                 project = get_object_or_404(Project, pk=pk)
                 sprint = Sprint.objects.filter(project=project).all()
                 latestSprint = project.getLatestSprint()
 
-                return self.renderSprint(request, latestSprint, project)
+                if latestSprint == None or latestSprint.status == 'C':
+                    return self.renderSprint(request, None, project)
+                else:
+                    return self.renderSprint(request, latestSprint, project)
 
             else:
                 return Http404("You do not have access to this project")
@@ -476,46 +478,61 @@ class SprintBacklogView(generic.View):
         project = get_object_or_404(Project, pk=pk)
         latestSprint = project.getLatestSprint()
 
-        #possible methods of posting
-        #getting a sprint sprint number
-
         if request.POST.get('sprint_id') != None:
             sprint_id = request.POST.get('sprint_id')
             sprint = get_object_or_404(Sprint, pk=sprint_id)
             return self.renderSprint(request, sprint, project)
+
         if request.POST.get('sprint_action') != None:
             if latestSprint == None or latestSprint.status == 'C':
                 return self.createNewSprint(project)
-            else:
-                if latestSprint.status == 'NS':
-                    project.startCurrentSprint()
-                    return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
-                elif latestSprint.status =='IP':
-                    project.endCurrentSprint()
-                    return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+            elif latestSprint.status == 'NS':
+                project.startCurrentSprint()
+                return HttpResponseRedirect(reverse('backtrack:project_sb', args=(project.pk, )))
+            elif latestSprint.status =='IP':
+                project.endCurrentSprint()
+                return HttpResponseRedirect(reverse('backtrack:project_sb', args=(project.pk, )))
+
 
         #what developers can do for tasks in pbi
         if request.POST.get('add_task') != None:
             pbi_id = request.POST.get('pbi_id')
             return HttpResponseRedirect(reverse('backtrack:new_task', args=(pbi_id,)))
         if request.POST.get('delete_task') != None:
-            return self.deleteTask(request, latestSprint)
+            return self.deleteTask(request, pk)
         if request.POST.get('modify_task') != None:
             return self.modifyTask(request, pk)
         if request.POST.get('remove_pbi') != None:
-            return self.removePBI(request, latestSprint)
+            return self.removePBI(request, pk)
+        if request.POST.get('complete_pbi') != None:
+            return self.completePBI(request, pk)
+        if request.POST.get('complete_task') != None:
+            return self.completeTask(request, pk)
 
-    def deleteTask(self, request, latestSprint):
+    def deleteTask(self, request, pk):
         task_id = request.POST.get('task_id')
         Task.objects.get(pk=task_id).delete()
-        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(pk, )))
 
-    def removePBI(self, request, latestSprint):
+    def completeTask(self, request, pk):
+        task_id = request.POST.get('task_id')
+        task = get_object_or_404(Task, pk=task_id)
+        task.completeTask()
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(pk, )))
+
+    def removePBI(self, request, pk):
         pbi_id = request.POST.get('pbi_id')
         pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
         pbi.sprint = None;
         pbi.save()
-        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(latestSprint.pk, )))
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(pk, )))
+
+    def completePBI(self, request, pk):
+        pbi_id = request.POST.get('pbi_id')
+        pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+        pbi.status = 'C'
+        pbi.save()
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(pk, )))
 
     def modifyTask(self, request, pk):
         task_id = request.POST.get('task_id')
@@ -524,13 +541,18 @@ class SprintBacklogView(generic.View):
     def createNewSprint(self, project):
         newSprint = project.createNewSprint()
         newSprint.save()
-        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(newSprint.pk,)))
+        return HttpResponseRedirect(reverse('backtrack:project_sb', args=(project.pk,)))
 
     def renderSprint(self, request, sprint, project):
+        if sprint == None:
+            context = {'project': project, 'status':1}
+            if is_dev(request.user, project.pk):
+                return render(request, 'backtrackapp/developerNoneSprintBacklog.html', context)
+            else:
+                return render(request, 'backtrackapp/noneSprintBacklog.html', context)
+
         user = request.user
-
         tasksInAllSprintPBIs = []
-
         sprintPBI_set = ProductBacklogItem.objects.filter(sprint=sprint).all()
 
         for sprintPBI in sprintPBI_set:
@@ -539,6 +561,7 @@ class SprintBacklogView(generic.View):
                 tasksInAllSprintPBIs.append(task)
 
         latestSprint = project.getLatestSprint()
+
         if latestSprint == None or latestSprint.status == 'C':
             status = 1
         elif latestSprint.status == 'NS':
@@ -548,12 +571,10 @@ class SprintBacklogView(generic.View):
 
         context = {'sprint':sprint, 'project': project, 'sprintPBI_set': sprintPBI_set, 'status':status}
 
-        if is_scrummaster(user):
-            return render(request, 'backtrackapp/scrumMasterSprintBacklog.html', context)
-        elif is_productowner(user, project.pk):
-            return render(request, 'backtrackapp/productOwnerSprintBacklog.html', context)
+        if is_dev(user, project.pk) and sprint == latestSprint:
+            return render(request, 'backtrackapp/modificationSprintBacklog.html', context)
         else:
-            return render(request, 'backtrackapp/busyDeveloperSprintBacklog.html', context)
+            return render(request, 'backtrackapp/nomodificationSprintBacklog.html', context)
 
 
 
