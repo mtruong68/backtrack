@@ -37,6 +37,7 @@
               <td class="displayTableCell">{{el.pbi.storypoints}}</td>
               <td class="displayTableCell">{{el.cum_points}}</td>
               <td class="displayTableCell">{{el.pbi.get_status_display}}</td>
+              {% if el.pbi.status != 'C' %}
               <td>
                 <form method="POST">
                   {% csrf_token %}
@@ -47,6 +48,7 @@
                     <input type="submit" value="Split" name="splitPBI">
                 </form>
               </td>
+              {% endif %}
             </tr>
             {% endfor %}
           </table>

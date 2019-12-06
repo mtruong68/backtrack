@@ -254,6 +254,7 @@ class ProductBacklogView(generic.View):
 
         pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
         pbi.sprint = latestSprint
+        pbi.status = 'IP'
         pbi.save()
         return HttpResponseRedirect(reverse('backtrack:project_pb', args=(project_id,)))
 
