@@ -330,7 +330,7 @@ class ProductBacklogView(generic.View):
 
     def checkPriority(self, pk, priorityInput):
         project = get_object_or_404(Project, pk=pk)
-        max_priority = project.productbacklogitem_set.all().count()
+        max_priority = project.productbacklogitem_set.all().count() + 1
 
         if max_priority == 0:
             return True

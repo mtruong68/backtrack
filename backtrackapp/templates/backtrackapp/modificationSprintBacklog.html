@@ -43,13 +43,15 @@
           <button class="sprintAction" name="sprint_action" type="submit">
             {% if status == 1 %}
             <p>Create New Sprint</p>
-            <p>Capacity of New Sprint:</p><input type="number" name='capacity'>
             {% elif status == 2 %}
             <p>Start Sprint</p>
             {% elif status == 3 %}
             <p>End Sprint</p>
             {% endif %}
           </button>
+          {% if status == 1 %}
+            <p>Capacity of New Sprint:</p><input type="number" name='capacity'>
+          {% endif %}
         </form>
       </span>
     </div>

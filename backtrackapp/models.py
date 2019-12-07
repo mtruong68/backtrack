@@ -53,8 +53,11 @@ class Project(models.Model):
         sprintPBIs = latestSprint.productbacklogitem_set.all()
 
         for PBI in sprintPBIs:
+            if PBI.completedTasks():
+                PBI.status = "C"
             if PBI.status != "C":
                 PBI.sprint = None
+                PBI.status = "NS"
                 PBI.save()
 
         latestSprint.status = "C"
