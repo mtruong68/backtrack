@@ -543,7 +543,8 @@ class SprintBacklogView(generic.View):
     def removePBI(self, request, pk):
         pbi_id = request.POST.get('pbi_id')
         pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
-        pbi.sprint = None;
+        pbi.sprint = None
+        pbi.status = 'NS'
         pbi.save()
         return HttpResponseRedirect(reverse('backtrack:project_sb', args=(pk, )))
 
