@@ -2,10 +2,10 @@
 Built with Python v 3.5.2 and Django 2.2.6
 
 ## current todo
-* permissions for adding tasks/pbi
+* check all permissions (sprint and product backlog)
 * figure out how to show capacity on sprint
-* allow only devs to do things on sprint
-* change product owner to look like sprint backlog
+
+* if you have time, work on project archival (don't deal w statistics)
 
 * ***WRITE TESTS***
 * deploy server to heroku or some other host

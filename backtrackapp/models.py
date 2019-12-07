@@ -38,7 +38,7 @@ class Project(models.Model):
             latestNumber = 1;
 
         sprint = Sprint(number=latestNumber, project=self)
-        return sprint;
+        return sprint
 
     def startCurrentSprint(self):
         latestSprint = self.getLatestSprint()
@@ -49,25 +49,25 @@ class Project(models.Model):
         latestSprint.save()
 
     def endCurrentSprint(self):
-        #get all the pbi from the current sprint set and set their sprint to none
-        #change status to complete
-        pass
+        latestSprint = self.getLatestSprint()
+        sprintPBIs = latestSprint.productbacklogitem_set.all()
+
+        for PBI in sprintPBIs:
+            if PBI.status != "C":
+                PBI.sprint = None
+                PBI.save()
+
+        latestSprint.status = "C"
+        latestSprint.save()
 
 
 class User(AbstractUser):
-    POST = (
-        ('D', 'Developer'),
-        ('M', 'Manager'),
-    )
     name = models.CharField(max_length=256)
-    role = models.CharField(max_length=1, choices=POST, default='D')
-    avaliable = models.BooleanField(default=True)
+    isManager = models.BooleanField(default = False)
     current_project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name
-
-
 
 
 
@@ -162,6 +162,17 @@ class ProductBacklogItem(models.Model):
     def totalEffortRemaining(self):
         return self.totalEstimatedEffort() - self.totalBurndown()
 
+    def completedTasks(self):
+        tasks = self.task_set.all()
+
+        if len(tasks) == 0:
+            return False
+
+        for task in tasks:
+            if task.status != 'C':
+                return False
+        return True
+
 
 class Task(models.Model):
     STATUS = (
@@ -182,3 +193,7 @@ class Task(models.Model):
 
     def remainingEffort(self):
         return self.estimate-self.burndown
+
+    def completeTask(self):
+        self.status = 'C'
+        self.save()

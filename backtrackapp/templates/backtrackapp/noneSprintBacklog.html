@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sprint Backlog{% endblock %}
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\sprintbacklog.css' %}">
+
+<div>
+  <span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">Product Backlog</a></span>
+  <span class="actionButton"><a href="{% url 'backtrack:project_sb' project.id %}">Sprint Backlog</a></span>
+</div>
+
+<div class="tabContent">
+  <a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
+  <div class="contentTitle">Sprint Backlog</div>
+
+    <div id="pastSprints">
+      {% if project.sprint_set.count > 0 %}
+      <form method="POST">
+        {% csrf_token %}
+        {% for sprint in project.sprint_set.all %}
+        <button class="actionButton" name="sprint_id" type="submit" value="{{sprint.id}}"">
+          <a>
+            {% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
+            Sprint {{sprint}}
+          </a>
+        </button>
+        {% endfor %}
+      </form>
+      {% else %}
+      <span class="contentTitle">No sprint is created in this project</span>
+      {% endif %}
+    </div>
+
+{% endblock %}

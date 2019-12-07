@@ -81,11 +81,11 @@
 
         <div>Burndown: <input type="number" value={{task.burndown}} name='burndown'></div>
 
-        <a class="linkbutton" href="{% url 'backtrack:project_sb' task.pbi.sprint.id %}">Cancel</a>
+        <a class="linkbutton" href="{% url 'backtrack:project_sb' task.pbi.project.id %}">Cancel</a>
         <input type="submit" value="Save" name="modifyTask">
       </form>
     </div>
     <a class="linkbutton" href="{% url 'backtrack:new_task' task.pbi.id %}">Back to PBI Task View</a>
-    <a class="linkbutton" href="{% url 'backtrack:project_sb' task.pbi.sprint.id %}">Back to Sprint Backlog</a>
+    <a class="linkbutton" href="{% url 'backtrack:project_sb' task.pbi.project.id %}">Back to Sprint Backlog</a>
   </div>
 </body>
