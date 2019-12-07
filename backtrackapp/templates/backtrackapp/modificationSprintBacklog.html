@@ -43,6 +43,7 @@
         <button class="sprintAction" name="sprint_action" type="submit">
         {% if status == 1 %}
           <p>Create New Sprint</p>
+          <p>Capacity of New Sprint:</p><input type="number" name='capacity'>
         {% elif status == 2 %}
           <p>Start Sprint</p>
         {% elif status == 3 %}
@@ -61,7 +62,7 @@
         <td class="displayTableCell">Total Effort Remaining</td>
       </tr>
       <tr>
-        <td class="displayTableCell">{{sprint.capacity}}</td>
+        <td class="displayTableCell">{{sprint.totalCapacity}}</td>
         <td class="displayTableCell">{{sprint.totalEstimatedEffort}}</td>
         <td class="displayTableCell">{{sprint.totalBurndown}}</td>
         <td class="displayTableCell">{{sprint.totalEffortRemaining}}</td>

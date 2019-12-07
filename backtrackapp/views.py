@@ -25,9 +25,6 @@ def has_access(user, project_pk):
     return False
 
 
-
-
-
 #Sees if user has permission to add/modify/delete PBI
 #True if user is product owner and it is their current project
 def is_productowner(user, project_pk):
@@ -122,6 +119,10 @@ class NewProjectView(generic.View):
 
     def post(self, request):
         user = request.user
+
+        if user.isManager:
+            return HttpResponse("Managers cannot create projects")
+
         projectForm = NewProjectForm(request.POST)
         teamForm = ProjectTeamForm(request.POST)
 
@@ -208,29 +209,30 @@ class ProductBacklogView(generic.View):
 
                 context = {'form': NewPBIForm(initial={'project': project}), 'project': project, 'latestSprint': latestSprint, 'pbi_cum_points_list': pbi_cum_points_list}
 
-                if user.isManager:
-                    return render(request, 'backtrackapp/scrumMasterProductBacklog.html', context)
-                elif is_productowner(user, project.pk):
+                if is_productowner(user, project.pk):
                     return render(request, 'backtrackapp/productOwnerProductBacklog.html', context)
-                else:
+                elif is_dev(user, project.pk):
                     return render(request, 'backtrackapp/busyDeveloperProductBacklog.html', context)
+                else:
+                    return render(request, 'backtrackapp/scrumMasterProductBacklog.html', context)
             else:
                 raise Http404("You do not have access to this project")
         else:
             return HttpResponseRedirect(reverse('login'))
 
     def post(self, request, pk):
+        print(pk)
         if request.POST.get('pbi_id') != None:
             pbi_id = int(request.POST.get('pbi_id'))
 
         if 'addToSprint' in request.POST:
             return self.addToSprint(request, pbi_id, pk)
         if 'createNewPBI' in request.POST:
-            return self.createNewPBI(request, pbi_id)
+            return self.createNewPBI(request, pbi_id, pk)
         if 'deletePBI' in request.POST:
-            return self.deletePBI(request, pbi_id)
+            return self.deletePBI(request, pbi_id, pk)
         if 'splitPBI' in request.POST:
-            return self.splitPBI(request, pbi_id)
+            return self.splitPBI(request, pbi_id, pk)
         if 'modifyPBI' in request.POST:
             return HttpResponseRedirect(reverse('backtrack:modify_PBI', args=(pbi_id,)))
         else:
@@ -254,35 +256,16 @@ class ProductBacklogView(generic.View):
         pbi.sprint = latestSprint
         pbi.status = 'IP'
         pbi.save()
-        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(project_id,)))
+        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(project_id, )))
 
-    def deletePBI(self, request, pk):
-        pbi = get_object_or_404(ProductBacklogItem, pk=pk)
-        self.updatePrioritiesDelete(pk, pbi.priority)
+    def deletePBI(self, request, pbi_id, project_id):
+        if is_productowner(request.user, project_id) == False:
+            return HttpResponse("Only product owners can modify the product backlog")
+
+        pbi = get_object_or_404(ProductBacklogItem, pk=pbi_id)
+        self.updatePrioritiesDelete(project_id, pbi.priority)
         pbi.delete()
-        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
-
-    def splitPBI(self, request, pk):
-        proj = get_object_or_404(Project, pk=pk)
-        num = request.POST.get('numOfChildPBI')
-        pbi_id = request.POST.get('pbi')
-        pbi = ProductBacklogItem.objects.get(pk=pbi_id)
-        i = 1
-        while (i <= int(num)):
-            ProductBacklogItem.objects.create(name = pbi.name + "." + str(i), desc = pbi.desc, priority = pbi.priority, storypoints = pbi.storypoints, status = pbi.status, project = proj)
-            i = i + 1
-        ProductBacklogItem.objects.get(pk=pbi_id).delete()
-        #redirect back to product backlog view
-        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
-
-    def checkPriority(self, pk, pri):
-        proj = get_object_or_404(Project, pk=pk)
-        max_priority = proj.productbacklogitem_set.all().count() + 1
-
-        if int(pri) > max_priority or int(pri) <= 0:
-            return False
-        else:
-            return True
+        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(project_id, )))
 
     def updatePriorities(self, request, pk, pri):
         proj = get_object_or_404(Project, pk=pk)
@@ -299,18 +282,20 @@ class ProductBacklogView(generic.View):
                     i.priority = temp + 1
                     i.save()
 
-    def updatePrioritiesDelete(self, pk, pri):
-        proj = get_object_or_404(Project, pk=pk)
+    def updatePrioritiesDelete(self, proj_id, pri):
+        proj = get_object_or_404(Project, pk=proj_id)
         pbis = proj.productbacklogitem_set.all()
         for pbi in pbis:
             if pbi.priority > pri:
                 pbi.priority = pbi.priority - 1
                 pbi.save()
 
-    def splitPBI(self, request, pk):
-        proj = get_object_or_404(Project, pk=pk)
+    def splitPBI(self, request, pbi_id, project_id):
+        if is_productowner(request.user, project_id) == False:
+            return HttpResponse("Only product owners can modify the product backlog")
+
+        proj = get_object_or_404(Project, pk=project_id)
         num = request.POST.get('numOfChildPBI')
-        pbi_id = request.POST.get('pbi')
         pbi = ProductBacklogItem.objects.get(pk=pbi_id)
         i = 1
         while (i <= int(num)):
@@ -318,7 +303,7 @@ class ProductBacklogView(generic.View):
             i = i + 1
         ProductBacklogItem.objects.get(pk=pbi_id).delete()
         #redirect back to product backlog view
-        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(pk,)))
+        return HttpResponseRedirect(reverse('backtrack:project_pb', args=(project_id,)))
 
 
 
@@ -484,7 +469,7 @@ class SprintBacklogView(generic.View):
 
         if request.POST.get('sprint_action') != None:
             if latestSprint == None or latestSprint.status == 'C':
-                return self.createNewSprint(project)
+                return self.createNewSprint(request, project)
             elif latestSprint.status == 'NS':
                 project.startCurrentSprint()
                 return HttpResponseRedirect(reverse('backtrack:project_sb', args=(project.pk, )))
@@ -537,8 +522,11 @@ class SprintBacklogView(generic.View):
         task_id = request.POST.get('task_id')
         return HttpResponseRedirect(reverse('backtrack:modify_task', args=(task_id,)))
 
-    def createNewSprint(self, project):
+    def createNewSprint(self, request, project):
+        capacity = request.POST.get('capacity')
+        print(capacity)
         newSprint = project.createNewSprint()
+        newSprint.totalCapacity = capacity
         newSprint.save()
         return HttpResponseRedirect(reverse('backtrack:project_sb', args=(project.pk,)))
 

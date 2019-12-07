@@ -23,6 +23,7 @@
         <button class="actionButton" name="sprint_id" type="submit" value="{{sprint.id}}"">
           <a>
             {% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
+
             Sprint {{sprint}}
           </a>
         </button>
@@ -48,6 +49,9 @@
           <p>End Sprint</p>
         {% endif %}
         </button>
+        {% if status == 1 %}
+        <p>Capacity of New Sprint:</p><input type="number" name='capacity'>
+        {% endif %}
       </form>
     </span>
 

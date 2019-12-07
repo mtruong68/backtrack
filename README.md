@@ -5,7 +5,6 @@ Built with Python v 3.5.2 and Django 2.2.6
 * check all permissions (sprint and product backlog)
 * figure out how to show capacity on sprint
 
-* integrate scrummaster functionality to user stuff
 * if you have time, work on project archival (don't deal w statistics)
 
 * ***WRITE TESTS***
