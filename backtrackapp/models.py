@@ -62,19 +62,12 @@ class Project(models.Model):
 
 
 class User(AbstractUser):
-    POST = (
-        ('D', 'Developer'),
-        ('M', 'Manager'),
-    )
     name = models.CharField(max_length=256)
-    role = models.CharField(max_length=1, choices=POST, default='D')
-    avaliable = models.BooleanField(default=True)
+    isManager = models.BooleanField(default = False)
     current_project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name
-
-
 
 
 

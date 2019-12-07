@@ -51,14 +51,6 @@ def is_dev(user, project_pk):
     return False
 
 
-#Sees if the user is the scrum master (manager)
-#True if user is scrum master
-def is_scrummaster(user):
-    if user.role == 'M':
-        return True
-    return False
-
-
 class SignUpView(generic.CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
@@ -69,7 +61,7 @@ class IndexView(generic.View):
     def get(self, request):
         user = request.user
         if user.is_authenticated:
-            if is_scrummaster(user):
+            if user.isManager:
                 return ProjectView.get(self, request, None)
             else:
                 if user.current_project != None:
@@ -89,7 +81,7 @@ class ProjectView(generic.View):
     def get(self, request, currentProjectID):
         user = request.user
         if user.is_authenticated:
-            if is_scrummaster(user):
+            if user.isManager:
                 projectTeamsManaged = ProjectTeam.objects.filter(scrum_master=user).all()
                 return render(request, 'backtrackapp/scrumMasterProject.html', {'projectTeamsManaged_list':projectTeamsManaged})
             else:
@@ -117,8 +109,8 @@ class NewProjectView(generic.View):
                 projects = Project.objects.all()
                 projectForm = NewProjectForm()
                 teamForm = ProjectTeamForm()
-                teamForm.fields['scrum_master'].queryset = User.objects.filter(current_project=None).exclude(pk=user.pk)
-                teamForm.fields['dev_team'].queryset = User.objects.filter(current_project=None).exclude(pk=user.pk)
+                teamForm.fields['scrum_master'].queryset = User.objects.filter(isManager = True).all()
+                teamForm.fields['dev_team'].queryset = User.objects.filter(current_project=None).exclude(pk=user.pk).filter(isManager = False).exclude(pk=user.pk)
 
                 return render(request, 'backtrackapp/_new_project.html', {'projectForm': projectForm, 'teamForm': teamForm})
         else:
@@ -212,7 +204,7 @@ class ProductBacklogView(generic.View):
 
                 context = {'form': NewPBIForm(initial={'project': project}), 'project': project, 'latestSprint': latestSprint, 'pbi_cum_points_list': pbi_cum_points_list}
 
-                if is_scrummaster(user):
+                if user.isManager:
                     return render(request, 'backtrackapp/scrumMasterProductBacklog.html', context)
                 elif is_productowner(user, project.pk):
                     return render(request, 'backtrackapp/productOwnerProductBacklog.html', context)
