@@ -1,18 +1,34 @@
+{% load static %}
 
-<h3> <a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}} </a>create Sprint</h3>
+<head>
+  <title>New Sprint</title>
+  <link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
+</head>
 
+<span class="actionButton"><a href="{% url 'backtrack:project_pb' project.id %}">{{project.name}} </a>create Sprint</span>
 {% load backtrackapp_extras %}
-
-<h3>Create Sprint {{project.sprint_set.all.count|add:1}}</h3>
+<span class="contentTitle">Create Sprint {{project.sprint_set.all.count|add:1}}</span>
 
 <form method="POST">
+  {% csrf_token %}
 
-{% csrf_token %}
+  <table>
+    {{ form.non_field_errors }}
+    {% for field in form.visible_fields %}
+    <tr>
+      <td valign="top"><div>{{ field.label_tag }}</div></td>
+      <td class="fieldWrapper">
+        <div>{{ field }}</div>
+        <div class="errorFieldWrapper">{{ field.errors }}</div>
+        <div class="helpFieldWrapper">{{ field.help_text }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+    {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+  </table>
 
-{{form.as_p}}
-
-<input type="submit" value="Create" name="createSprint">
-
-
-
-</form>
+  <p>
+    <input class="actionButton" type="submit" value="Create" name="createSprint">
+  </form>

@@ -5,17 +5,17 @@
 {% block content %}
 
 <div class="projectBlock">
-<img class="iconPin" src="{% static '\backtrackapp\images\icon1.jpg' %}">
-<img class="iconBell" src="{% static '\backtrackapp\images\icon3.jpg' %}">
-<br>
-<span class="contentTitle"><a href="{% url 'backtrack:project_pb' currentProject.id %}">{{currentProject}}</a></span><br>
-<div class="projectInfoBlock">
-<span class="helpFieldWrapper">Description: {{currentProject.desc}}</span><br>
-<span class="helpFieldWrapper">Status: {{currentProject.get_status_display}}</span><br>
-<span class="helpFieldWrapper">Start Date: {{currentProject.startDate}}</span><br>
-<span class="helpFieldWrapper">End Date: {{currentProject.endDate}}</span><br>
-</div>
-<a href="{% url 'backtrack:project_pb' currentProject.id %}"><img class="iconEnlarge" src="{% static '\backtrackapp\images\icon2.jpg' %}"></a>
+  <img class="iconPin" src="{% static '\backtrackapp\images\icon1.jpg' %}">
+  <img class="iconBell" src="{% static '\backtrackapp\images\icon3.jpg' %}">
+  <br>
+  <span class="contentTitle"><a href="{% url 'backtrack:project_pb' currentProject.id %}">{{currentProject}}</a></span><br>
+  <div class="projectInfoBlock">
+    <span class="helpFieldWrapper">Description: {{currentProject.desc}}</span><br>
+    <span class="helpFieldWrapper">Status: {{currentProject.get_status_display}}</span><br>
+    <span class="helpFieldWrapper">Start Date: {{currentProject.startDate}}</span><br>
+    <span class="helpFieldWrapper">End Date: {{currentProject.endDate}}</span><br>
+  </div>
+  <a href="{% url 'backtrack:project_pb' currentProject.id %}"><img class="iconEnlarge" src="{% static '\backtrackapp\images\icon2.jpg' %}"></a>
 </div>
 
 {% endblock %}

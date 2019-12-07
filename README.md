@@ -1,14 +1,8 @@
 # Backtrack application for Scrum Management
 Built with Python v 3.5.2 and Django 2.2.6
 
-## current todo
-* check all permissions (sprint and product backlog)
-* figure out how to show capacity on sprint
-
-* if you have time, work on project archival (don't deal w statistics)
-
-* ***WRITE TESTS***
-* deploy server to heroku or some other host
+##Limitations
+Some things have not currently been implemented. There is no invitation system: if a user is added to a project by a product owner, they do not have the ability to remove themself from the project. Additionally, project management does not currently exist: there is no implementation for what is done at the end of the project. The scrummaster does not have access to automatically generated burndown charts. 
 
 To run locally on your machine:
 `$ python manage.py runserver`

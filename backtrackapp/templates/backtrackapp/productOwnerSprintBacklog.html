@@ -17,23 +17,23 @@
   <a href="{% url 'backtrack:index' %}"><img class="iconCollapse" src="{% static '\backtrackapp\images\icon4.jpg' %}"></a>
   <div class="contentTitle">Sprint Backlog</div>
 
-    <div id="pastSprints">
-      {% if project.sprint_set.count > 0 %}
-      <form method="POST">
-        {% csrf_token %}
-        {% for sprint in project.sprint_set.all %}
-        <button class="actionButton" name="sprint_id" type="submit" value="{{sprint.id}}"">
-          <a>
-            {% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
-            Sprint {{sprint}}
-          </a>
-        </button>
-        {% endfor %}
-      </form>
-      {% else %}
-      <span class="contentTitle">No sprint is created in this project</span>
-      {% endif %}
-    </div>
+  <div id="pastSprints">
+    {% if project.sprint_set.count > 0 %}
+    <form method="POST">
+      {% csrf_token %}
+      {% for sprint in project.sprint_set.all %}
+      <button class="actionButton" name="sprint_id" type="submit" value="{{sprint.id}}"">
+        <a>
+          {% if sprint == project.trylatestSprint %}<b>(current)</b>{% endif %}
+          Sprint {{sprint}}
+        </a>
+      </button>
+      {% endfor %}
+    </form>
+    {% else %}
+    <span class="contentTitle">No sprint is created in this project</span>
+    {% endif %}
+  </div>
 
   <div>
     <span class="contentTitle">Sprint {{sprint.number}}</span><br>
@@ -54,40 +54,40 @@
     </table>
 
     <span>Tasks in the selected sprint</span><br>
-      <table class="displayTable">
-        <tr>
-          <td class="displayTableCell"><b>Parent PBI</b></td>
-          <td class="displayTableCell"><b>Task Name</b></td>
-          <td class="displayTableCell"><b>Task Description</b></td>
-          <td class="displayTableCell"><b>Status</b></td>
-          <td class="displayTableCell"><b>Developer Assigned</b></td>
-          <td class="displayTableCell"><b>Estimated</b></td>
-          <td class="displayTableCell"><b>Burndown</b></td>
-          <td class="displayTableCell"><b>Remaining Effort</b></td>
-        </tr>
+    <table class="displayTable">
+      <tr>
+        <td class="displayTableCell"><b>Parent PBI</b></td>
+        <td class="displayTableCell"><b>Task Name</b></td>
+        <td class="displayTableCell"><b>Task Description</b></td>
+        <td class="displayTableCell"><b>Status</b></td>
+        <td class="displayTableCell"><b>Developer Assigned</b></td>
+        <td class="displayTableCell"><b>Estimated</b></td>
+        <td class="displayTableCell"><b>Burndown</b></td>
+        <td class="displayTableCell"><b>Remaining Effort</b></td>
+      </tr>
 
-        {% for sprintPBI in sprintPBI_set %}
-        <tr>
-          <td class="PBIinfo" rowspan="{{sprintPBI.task_set.count}}">
-            <div class=sprintPBIcontent>
+      {% for sprintPBI in sprintPBI_set %}
+      <tr>
+        <td class="PBIinfo" rowspan="{{sprintPBI.task_set.count}}">
+          <div class=sprintPBIcontent>
             {{sprintPBI.name}}
-            </div>
-          </td>
+          </div>
+        </td>
 
-          {% for task in sprintPBI.task_set.all %}
-            <td class="displayTableCell">{{ task.name }}</td>
-            <td class="displayTableCell">{{ task.desc }}</td>
-            <td class="displayTableCell">{{ task.get_status_display }}</td>
-            <td class="displayTableCell">{{ task.assignment }}</td>
-            <td class="displayTableCell">{{ task.estimate }}</td>
-            <td class="displayTableCell">{{ task.burndown }}</td>
-            <td class="displayTableCell">{{task.remainingEffort}}</td>
-          </tr>
-          {% endfor %}
-        {% endfor %}
-        </table>
+        {% for task in sprintPBI.task_set.all %}
+        <td class="displayTableCell">{{ task.name }}</td>
+        <td class="displayTableCell">{{ task.desc }}</td>
+        <td class="displayTableCell">{{ task.get_status_display }}</td>
+        <td class="displayTableCell">{{ task.assignment }}</td>
+        <td class="displayTableCell">{{ task.estimate }}</td>
+        <td class="displayTableCell">{{ task.burndown }}</td>
+        <td class="displayTableCell">{{task.remainingEffort}}</td>
+      </tr>
+      {% endfor %}
+      {% endfor %}
+    </table>
 
-    </div>
   </div>
+</div>
 
-  {% endblock %}
+{% endblock %}

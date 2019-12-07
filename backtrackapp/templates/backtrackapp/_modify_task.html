@@ -1,91 +1,51 @@
+{% load static %}
+
 <head>
   <title>Modify Task</title>
+  <link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
 </head>
 
-<style>
-  input {
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-  }
+<span class="contentTitle">Modify Task: {{task.name}}</span>
+<form method="POST" id="modTaskForm">
+  {% csrf_token %}
 
-  button {
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-  }
+  <table>
+    {% autoescape off %}
+    <tr>
+      <td>Task Name:</td>
+      <td><input type="text" value="{{task.name|escape}}" name='name'></td>
+    </tr>
+    <tr>
+      <td>Task Description:</td>
+      <td><input type="text" value="{{task.desc|escape}}" name='desc'></td>
+    </tr>
+    {% endautoescape %}
+    <tr>
+      <td>Assign Developer to Task:</td>
+      <td>
+        <select name="assignment" form="modTaskForm">
+          {% for user in availableUsers %}
+          <option value={{user.pk}}>{{user.name}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Status:</td>
+      <td>
+        <select name="status" form="modTaskForm">
+          {% for option in choices %}
+          <option value={{option.value}} selected={{option.selected}}>{{option.status}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Burndown:</td><td><input type="number" value={{task.burndown}} name='burndown'></td>
+    </tr>
+  </table>
 
-  div#main {
-    border: 3px solid black;
-    overflow-y: scroll;
-    background-color: white;
-    padding: 10px;
-  }
-
-  div#mainFrame {
-    border: 3px solid black;
-    padding: 10px;
-    background-color: lightgrey;
-  }
-
-  .mydiv {
-    margin: auto;
-    width: auto;
-    border: 3px solid black;
-    padding: 10px;
-  }
-
-  .linkbutton {
-    border: 1px #b3b3b3 solid;
-    background-color: #dbdbdb;
-    color: black;
-    font-size: 14px;
-    padding: 2px;
-  }
-
-  a {
-    text-decoration: None;
-  }
-
-  body {
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-  }
-</style>
-
-<body>
-  <div id="mainFrame">
-    <h3> Modify Task: {{task.name}}</h3>
-    <div id="main">
-      <form method="POST" id="modTaskForm">
-        {% csrf_token %}
-
-        {% autoescape off %}
-        <div>Task Name: <input type="text" value="{{task.name|escape}}" name='name'></div>
-        <div>Task Description:
-        <input type="text" value="{{task.desc|escape}}" name='desc'>
-        </div>
-        {% endautoescape %}
-
-        <div>
-          Assign Developer to Task:
-          <select name="assignment" form="modTaskForm">
-            {% for user in availableUsers %}
-            <option value={{user.pk}}>{{user.name}}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div> Status:
-          <select name="status" form="modTaskForm">
-            {% for option in choices %}
-            <option value={{option.value}} selected={{option.selected}}>{{option.status}}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div>Burndown: <input type="number" value={{task.burndown}} name='burndown'></div>
-
-        <a class="linkbutton" href="{% url 'backtrack:project_sb' task.pbi.project.id %}">Cancel</a>
-        <input type="submit" value="Save" name="modifyTask">
-      </form>
-    </div>
-    <a class="linkbutton" href="{% url 'backtrack:new_task' task.pbi.id %}">Back to PBI Task View</a>
-    <a class="linkbutton" href="{% url 'backtrack:project_sb' task.pbi.project.id %}">Back to Sprint Backlog</a>
-  </div>
-</body>
+  <p>
+    <input class="actionButton" type="submit" value="Save" name="modifyTask">
+  </form>
+  <span class="actionButton"><a class="linkbutton" href="{% url 'backtrack:project_sb' task.pbi.project.id %}">Back to Sprint Backlog</a></span>
