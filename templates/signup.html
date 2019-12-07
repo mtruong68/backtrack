@@ -7,29 +7,29 @@
 <span class="contentTitle">Registration</span><br>
 Please fill in all the information<p>
 
-<form method="post">
-{% csrf_token %}
-{{ form.non_field_errors }}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
 
-<table>
-{% for field in form.visible_fields %}
-<tr>
-<td valign="top"><div>{{ field.label_tag }}</div></td>
-<td class="fieldWrapper">
-<div>{{ field }}</div>
-<div class="errorFieldWrapper">{{ field.errors }}</div>
-<div class="helpFieldWrapper">{{ field.help_text }}</div>
-</td>
-</tr>
-{% endfor %}
-</table>
+    <table>
+      {% for field in form.visible_fields %}
+      <tr>
+        <td valign="top"><div>{{ field.label_tag }}</div></td>
+        <td class="fieldWrapper">
+          <div>{{ field }}</div>
+          <div class="errorFieldWrapper">{{ field.errors }}</div>
+          <div class="helpFieldWrapper">{{ field.help_text }}</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
 
-{% for hidden in form.hidden_fields %}
-{{ hidden }}
-{% endfor %}
+    {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
 
-<p>
-<button class="actionButton" type="submit"><a>Register</a></button>
-</form>
+    <p>
+      <button class="actionButton" type="submit"><a>Register</a></button>
+    </form>
 
-{% endblock %}
+    {% endblock %}

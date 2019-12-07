@@ -2,6 +2,7 @@ from django.views import generic
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
+from django.core import mail
 
 from html import unescape
 
@@ -164,6 +165,16 @@ class NewProjectView(generic.View):
         for member_id in dev_team:
             newTeam.dev_team.add(User.objects.get(pk=int(member_id)))
             newTeam.save()
+            with mail.get_connection() as connection:
+                developer = User.objects.get(pk=int(member_id))
+                subject = 'Welcome to the NEW SCRUM PROJECT'
+                body = 'Hi, ' + developer.name + '! Someone is inviting you to join a new scrum project! Login to BackTrack and check it out!'
+                sender = 'autoSender@backtrack.com'
+                receiver = developer.email
+                mail.EmailMessage(
+                    subject, body, sender, [receiver],
+                    connection=connection,
+                ).send()
 
     def update_team_current_project(self, newTeam):
         project = newTeam.project
@@ -171,6 +182,18 @@ class NewProjectView(generic.View):
         newTeam.product_owner.save()
         newTeam.scrum_master.current_project = project
         newTeam.scrum_master.save()
+
+        with mail.get_connection() as connection:
+            teamManager = newTeam.scrum_master
+            subject = 'Welcome to the NEW SCRUM PROJECT'
+            body = 'Hi, ' + teamManager.name + '! Someone is inviting you to join a new scrum project! Login to BackTrack and check it out!'
+            sender = 'autoSender@backtrack.com'
+            receiver = teamManager.email
+            mail.EmailMessage(
+                subject, body, sender, [receiver],
+                connection=connection,
+            ).send()
+
         for dev in newTeam.dev_team.all():
             print(dev.name)
             dev.current_project = project
@@ -304,6 +327,19 @@ class ProductBacklogView(generic.View):
         ProductBacklogItem.objects.get(pk=pbi_id).delete()
         #redirect back to product backlog view
         return HttpResponseRedirect(reverse('backtrack:project_pb', args=(project_id,)))
+
+    def checkPriority(self, pk, priorityInput):
+        project = get_object_or_404(Project, pk=pk)
+        max_priority = project.productbacklogitem_set.all().count()
+
+        if max_priority == 0:
+            return True
+
+        newPri = int(priorityInput)
+        if newPri > max_priority or newPri <= 0:
+            return False
+        else:
+            return True
 
 
 

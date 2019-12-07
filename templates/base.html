@@ -2,30 +2,30 @@
 {% load static %}
 
 <head>
-<meta charset="utf-8">
-<title>Welcome to BackTrack</title>
-<link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
+  <meta charset="utf-8">
+  <title>Welcome to BackTrack</title>
+  <link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
 </head>
 
 <body>
 
-<div id="title"><a href="{% url 'home' %}"><h1>BackTrack</h1></a></div>
-<div id="menuButtonBar">
-{% if user.is_authenticated %}
-<span>Hi, {{ user.name }}!</span>
-<span class="actionButton"><a href="{% url 'backtrack:index' %}">{{ user.name }}</a></span>
-<span class="actionButton"><a href="{% url 'logout' %}">logout</a></span>
-{% else %}
-<span class="actionButton"><a href="{% url 'login' %}">Sign In</a></span>
-<span class="actionButton"><a href="{% url 'backtrack:signup' %}">Create Your Account</a></span>
-{% endif %}
-</div>
+  <div id="title"><a href="{% url 'home' %}"><h1>BackTrack</h1></a></div>
+  <div id="menuButtonBar">
+    {% if user.is_authenticated %}
+    <span>Hi, {{ user.name }}!</span>
+    <span class="actionButton"><a href="{% url 'backtrack:index' %}">{{ user.name }}</a></span>
+    <span class="actionButton"><a href="{% url 'logout' %}">logout</a></span>
+    {% else %}
+    <span class="actionButton"><a href="{% url 'login' %}">Sign In</a></span>
+    <span class="actionButton"><a href="{% url 'backtrack:signup' %}">Create Your Account</a></span>
+    {% endif %}
+  </div>
 
-<div id="mainContent">
-<main>
-{% block content %}
-{% endblock %}
-</main>
-</div>
+  <div id="mainContent">
+    <main>
+      {% block content %}
+      {% endblock %}
+    </main>
+  </div>
 
 </body>
