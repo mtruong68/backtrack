@@ -62,7 +62,8 @@ class IndexView(generic.View):
         user = request.user
         if user.is_authenticated:
             if user.isManager:
-                return ProjectView.get(self, request, None)
+                project = get_object_or_404(Project, pk=user.current_project.pk)
+                return ProjectView.get(self, request, project.pk)
             else:
                 if user.current_project != None:
                     project = get_object_or_404(Project, pk=user.current_project.pk)
@@ -83,7 +84,10 @@ class ProjectView(generic.View):
         if user.is_authenticated:
             if user.isManager:
                 projectTeamsManaged = ProjectTeam.objects.filter(scrum_master=user).all()
-                return render(request, 'backtrackapp/scrumMasterProject.html', {'projectTeamsManaged_list':projectTeamsManaged})
+                projectsManaged=[]
+                for pt in projectTeamsManaged:
+                    projectsManaged.append(pt.project)
+                return render(request, 'backtrackapp/scrumMasterProject.html', {'projects':projectsManaged})
             else:
                 project = get_object_or_404(Project, pk=currentProjectID)
                 if is_productowner(user, currentProjectID):
@@ -145,7 +149,7 @@ class NewProjectView(generic.View):
         dev_team.append(str(user.id))
         result = True if len(dev_team) == len(set(dev_team)) else False
 
-        for member_id in dev_team:
+        for member_id in request.POST.getlist('dev_team'):
             member = get_object_or_404(User, pk=int(member_id))
             if member.current_project != None:
                 return False
@@ -241,6 +245,8 @@ class ProductBacklogView(generic.View):
         project = get_object_or_404(Project, pk=project_id)
         latestSprint = project.getLatestSprint()
 
+        if latestSprint == None:
+            return HttpResponse("You must create the sprint before adding PBIs to the current sprint")
         if latestSprint.status != 'IP':
             return HttpResponse("You must start the sprint before adding PBIs to the current sprint")
 
