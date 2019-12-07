@@ -6,16 +6,16 @@
 
 <div id="headline">
 
-<span class="headlineHeading">Faster Creation, Easier Management, Better Tracking</span><p>
-<span class="headlineHeading">for your</span><p>
-<span class="headlineHeading">Agile Scrum Project</span><p>
+  <span class="headlineHeading">Faster Creation, Easier Management, Better Tracking</span><p>
+    <span class="headlineHeading">for your</span><p>
+      <span class="headlineHeading">Agile Scrum Project</span><p>
 
-{% if user.is_authenticated %}
-<span class="actionButton"><a href="{% url 'backtrack:index' %}">Let's Get Started</a></span>
-{% else %}
-<span class="actionButton"><a href="{% url 'login' %}">Let's Get Started</a></span>
-{% endif %}
+        {% if user.is_authenticated %}
+        <span class="actionButton"><a href="{% url 'backtrack:index' %}">Let's Get Started</a></span>
+        {% else %}
+        <span class="actionButton"><a href="{% url 'login' %}">Let's Get Started</a></span>
+        {% endif %}
 
-</div>
+      </div>
 
-{% endblock %}
+      {% endblock %}

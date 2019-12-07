@@ -1,15 +1,44 @@
-<h3>New Task for {{pbi.name}}</h3>
-<a href="{% url 'backtrack:project_sb' pbi.sprint.id %}"> Back to Sprint Backlog</a>
+{% load static %}
 
-<h3>Add Task</h3>
+<head>
+  <title>New Task</title>
+  <link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
+</head>
+
+<span class="contentTitle">Add Task</span>
 <form method="POST" id="newTaskForm">
   {% csrf_token %}
-  {{form.as_p}}
-  Assign Developer to Task:
-  <select name="assignment" form="newTaskForm">
-    {% for user in availableUsers %}
-    <option value={{user.pk}}>{{user.name}}</option>
+
+  <table>
+    {{ form.non_field_errors }}
+    {% for field in form.visible_fields %}
+    <tr>
+      <td valign="top"><div>{{ field.label_tag }}</div></td>
+      <td class="fieldWrapper">
+        <div>{{ field }}</div>
+        <div class="errorFieldWrapper">{{ field.errors }}</div>
+        <div class="helpFieldWrapper">{{ field.help_text }}</div>
+      </td>
+    </tr>
     {% endfor %}
-  </select>
-  <input type="submit" value="Add task" name="addTask">
-</form>
+    {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+    <tr>
+      <td>
+        Assign Developer to Task:
+      </td>
+      <td>
+        <select name="assignment" form="newTaskForm">
+          {% for user in availableUsers %}
+          <option value={{user.pk}}>{{user.name}}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>
+  </table>
+
+  <p>
+    <input class="actionButton" type="submit" value="Add task" name="addTask">
+  </form>
+  <span class="actionButton"><a href="{% url 'backtrack:project_sb' pbi.sprint.id %}"> Back to Sprint Backlog</a><span>

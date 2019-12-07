@@ -1,50 +1,56 @@
+{% load static %}
+
+<head>
+  <title>New Project</title>
+  <link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
+</head>
+
 <span class="contentTitle">Create New Project</span>
 <form method="POST">
-{% csrf_token %}
+  {% csrf_token %}
 
-<table>
+  <table>
 
-{{ projectForm.non_field_errors }}
-{% for field in projectForm.visible_fields %}
-<tr>
-<td valign="top"><div>{{ field.label_tag }}</div></td>
-<td class="fieldWrapper">
-<div>{{ field }}</div>
-<div class="errorFieldWrapper">{{ field.errors }}</div>
-<div class="helpFieldWrapper">{{ field.help_text }}</div>
-</td>
-</tr>
-{% endfor %}
-{% for hidden in projectForm.hidden_fields %}
-{{ hidden }}
-{% endfor %}
+    {{ projectForm.non_field_errors }}
+    {% for field in projectForm.visible_fields %}
+    <tr>
+      <td valign="top"><div>{{ field.label_tag }}</div></td>
+      <td class="fieldWrapper">
+        <div>{{ field }}</div>
+        <div class="errorFieldWrapper">{{ field.errors }}</div>
+        <div class="helpFieldWrapper">{{ field.help_text }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+    {% for hidden in projectForm.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
 
-<tr>
-<td valign="top"><div>Product Owner:</div></td>
-<td class="fieldWrapper">
-<div>{{user.name}}</div>
-</td>
-</tr>
+    <tr>
+      <td valign="top"><div>Product Owner:</div></td>
+      <td class="fieldWrapper">
+        <div>{{user.name}}</div>
+      </td>
+    </tr>
 
-{% csrf_token %}
-{{ teamForm.non_field_errors }}
-{% for field in teamForm.visible_fields %}
-<tr>
-<td valign="top"><div>{{ field.label_tag }}</div></td>
-<td class="fieldWrapper">
-<div>{{ field }}</div>
-<div class="errorFieldWrapper">{{ field.errors }}</div>
-<div class="helpFieldWrapper">{{ field.help_text }}</div>
-</td>
-</tr>
-{% endfor %}
-{% for hidden in teamForm.hidden_fields %}
-{{ hidden }}
-{% endfor %}
+    {% csrf_token %}
+    {{ teamForm.non_field_errors }}
+    {% for field in teamForm.visible_fields %}
+    <tr>
+      <td valign="top"><div>{{ field.label_tag }}</div></td>
+      <td class="fieldWrapper">
+        <div>{{ field }}</div>
+        <div class="errorFieldWrapper">{{ field.errors }}</div>
+        <div class="helpFieldWrapper">{{ field.help_text }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+    {% for hidden in teamForm.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
 
+  </table>
 
-</table>
-
-<p>
-<input class="actionButton" type="submit" value="Create Project">
-</form>
+  <p>
+    <input class="actionButton" type="submit" value="Create Project">
+  </form>

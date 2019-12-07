@@ -1,34 +1,31 @@
+{% load static %}
+
 <head>
-<title>Modify PBI</title>
+  <title>New PBI</title>
+  <link rel="stylesheet" type="text/css" href="{% static '\backtrackapp\backtrackStyle.css' %}">
 </head>
 
-<style>
-input {
-font-family: "Trebuchet MS", Helvetica, sans-serif;
-}
-
-.mydiv {
-margin: auto;
-width: auto;
-border: 3px solid black;
-padding: 10px;
-}
-
-body {
-font-family: "Trebuchet MS", Helvetica, sans-serif;
-}
-</style>
-
-<body>
-
-
-<div id="createNewPBI">
+<span class="contentTitle">Create New PBI</span>
 <form method="POST">
-{% csrf_token %}
-<h3>Create New PBI</h3>
-{{form.as_p}}
-<input type="submit" value="Create New PBI" name="createNewPBI">
-</form>
-</div>
+  {% csrf_token %}
 
-</body>
+  <table>
+    {{ form.non_field_errors }}
+    {% for field in form.visible_fields %}
+    <tr>
+      <td valign="top"><div>{{ field.label_tag }}</div></td>
+      <td class="fieldWrapper">
+        <div>{{ field }}</div>
+        <div class="errorFieldWrapper">{{ field.errors }}</div>
+        <div class="helpFieldWrapper">{{ field.help_text }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+    {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+  </table>
+
+  <p>
+    <input class="actionButton" type="submit" value="Create New PBI" name="createNewPBI">
+  </form>

@@ -41,11 +41,11 @@
               <td>
                 <form method="POST">
                   {% csrf_token %}
-                    <input type="hidden" name="pbi_id" value={{el.pbi.pk}}>
-                    <input type="submit" value="Modify" name="modifyPBI">
-                    <input type="submit" value="Delete" name="deletePBI"><br>
-                    <input type="text" placeholder="Number of Child PBI" name="numOfChildPBI"><br>
-                    <input type="submit" value="Split" name="splitPBI">
+                  <input type="hidden" name="pbi_id" value={{el.pbi.pk}}>
+                  <input type="submit" value="Modify" name="modifyPBI">
+                  <input type="submit" value="Delete" name="deletePBI"><br>
+                  <input type="text" placeholder="Number of Child PBI" name="numOfChildPBI"><br>
+                  <input type="submit" value="Split" name="splitPBI">
                 </form>
               </td>
               {% endif %}
